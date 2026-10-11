@@ -124,13 +124,13 @@ flowchart TD
 - [x] **Frontend**: Modificar `LoginPage.tsx` y `RegisterPage.tsx` para invocar al backend y mostrar mensajes de error dinámicos.
 
 ### Fase 3: Catálogo, Búsqueda y Detalle de Productos
-- [ ] **Backend**: Crear `category.controller.ts` y ruta `GET /api/categories` para exponer las categorías disponibles.
-- [ ] **Backend**: Ajustar `getProducts` en `product.controller.ts` para soportar filtro por nombre de categoría y asegurar que `price` retorne como número.
-- [ ] **Backend**: Ampliar el script `seed.ts` con los 10 productos del catálogo con carátulas e inventarios correspondientes.
-- [ ] **Frontend**: Crear `productService.ts` con `getProducts`, `getProductById` y `getCategories`.
-- [ ] **Frontend**: Actualizar `AlbumCover.tsx` para renderizar etiquetas `<img>` si se provee una URL de imagen, manteniendo el gradiente como fallback.
-- [ ] **Frontend**: Conectar `HomePage.tsx` y `CatalogPage.tsx` para consumir `getProducts` con estados de carga y errores.
-- [ ] **Frontend**: Conectar `ProductPage.tsx` para consultar el producto por ID desde el backend.
+- [x] **Backend**: Crear `category.controller.ts` y ruta `GET /api/categories` para exponer las categorías disponibles.
+- [x] **Backend**: Ajustar `getProducts` en `product.controller.ts` para soportar filtro por nombre de categoría y asegurar que `price` retorne como número.
+- [x] **Backend**: Ampliar el script `seed.ts` con los 10 productos del catálogo con carátulas e inventarios correspondientes.
+- [x] **Frontend**: Crear `productService.ts` con `getProducts`, `getProductById` y `getCategories`.
+- [x] **Frontend**: Actualizar `AlbumCover.tsx` para renderizar etiquetas `<img>` si se provee una URL de imagen, manteniendo el gradiente como fallback.
+- [x] **Frontend**: Conectar `HomePage.tsx` y `CatalogPage.tsx` para consumir `getProducts` con estados de carga y errores.
+- [x] **Frontend**: Conectar `ProductPage.tsx` para consultar el producto por ID desde el backend.
 
 ### Fase 4: Personalización y Subida de Archivos
 - [ ] **Backend**: Permitir que `addTracksToCustomProduct` en `customProduct.controller.ts` acepte metadatos de pistas incluso si no se adjuntan archivos binarios.
