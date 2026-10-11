@@ -112,9 +112,9 @@ flowchart TD
 ## 5. 📝 Plan de Trabajo y Checklist de Tareas
 
 ### Fase 1: Infraestructura y Cliente HTTP Base
-- [ ] **Frontend**: Crear archivo `.env` en la raíz de `disc-market-frontend` con `VITE_API_URL=http://localhost:5000/api` y `VITE_UPLOADS_URL=http://localhost:5000`.
-- [ ] **Frontend**: Crear módulo de cliente HTTP tipado (`src/shared/api/apiClient.ts`) con gestión de tokens y manejo centralizado de respuestas y errores.
-- [ ] **Frontend**: Implementar adaptadores/mapeadores (`src/shared/api/mappers.ts`) para transformar respuestas de la API a los tipos de la interfaz.
+- [x] **Frontend**: Crear archivo `.env` en la raíz de `disc-market-frontend` con `VITE_API_URL=http://localhost:5000/api` y `VITE_UPLOADS_URL=http://localhost:5000`.
+- [x] **Frontend**: Crear módulo de cliente HTTP tipado (`src/shared/api/apiClient.ts`) con gestión de tokens y manejo centralizado de respuestas y errores.
+- [x] **Frontend**: Implementar adaptadores/mapeadores (`src/shared/api/mappers.ts`) para transformar respuestas de la API a los tipos de la interfaz.
 
 ### Fase 2: Autenticación y Gestión de Sesión
 - [ ] **Backend**: Crear middleware `auth.middleware.ts` para verificar y decodificar el token JWT en las cabeceras `Authorization`.
