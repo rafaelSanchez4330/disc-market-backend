@@ -16,6 +16,23 @@ Actualmente, ambos repositorios se encuentran en la rama `feat/back-front-connec
 
 ## 2. 🏗️ Arquitectura de Comunicación
 
+![Arquitectura de Comunicación](./architecture.svg)
+
+```text
+┌─────────────────────────────────┐        HTTP / JSON         ┌─────────────────────────────────┐        TCP / SQL         ┌─────────────────────────────────┐
+│     disc-market-frontend        │   (Bearer JWT / Auth)      │      disc-market-backend        │   (Port 5432)            │       PostgreSQL 16             │
+│        (Port 5173)              ├───────────────────────────►│          (Port 5000)            ├─────────────────────────►│     (disc_market_postgres)      │
+├─────────────────────────────────┤                            ├─────────────────────────────────┤                          ├─────────────────────────────────┤
+│ • UI Pages & Components         │        FormData            │ • Express API Routers (/api/*)  │                          │ • 12 Tablas relacionales        │
+│ • Contexts (Auth / Cart)        │   (Uploads / Archivos)     │ • auth.middleware (Valida JWT)  │                          │   (users, products, orders...)  │
+│ • Data Mappers (DTOs)           ├───────────────────────────►│ • upload.middleware (Multer)    │                          │                                 │
+│ • apiClient (fetch / services)  │                            │ • TypeORM (Data Source)         │                          │ • uploads/ (Portadas y Audios)  │
+└─────────────────────────────────┘                            └─────────────────────────────────┘                          └─────────────────────────────────┘
+```
+
+<details>
+<summary><b>Ver definición Mermaid original</b></summary>
+
 ```mermaid
 flowchart TD
     subgraph Frontend["disc-market-frontend (Vite :5173)"]
@@ -52,6 +69,8 @@ flowchart TD
     API_CLI -->|"HTTP JSON + Bearer JWT"| ROUTERS
     API_CLI -->|"FormData (Archivos)"| UPLOAD_MID
 ```
+
+</details>
 
 ---
 
