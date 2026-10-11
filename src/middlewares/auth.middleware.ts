@@ -36,3 +36,27 @@ export const authenticateToken = (
     res.status(403).json({ message: 'Token inválido o expirado' });
   }
 };
+
+export const optionalAuthenticateToken = (
+  req: AuthenticatedRequest,
+  _res: Response,
+  next: NextFunction
+): void => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return next();
+  }
+
+  try {
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || 'secret_key'
+    ) as AuthUserPayload;
+    req.user = decoded;
+  } catch {
+    // Si es inválido, continuar sin usuario autenticado
+  }
+  next();
+};

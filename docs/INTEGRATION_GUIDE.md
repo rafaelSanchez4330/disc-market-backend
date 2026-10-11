@@ -133,9 +133,9 @@ flowchart TD
 - [x] **Frontend**: Conectar `ProductPage.tsx` para consultar el producto por ID desde el backend.
 
 ### Fase 4: Personalización y Subida de Archivos
-- [ ] **Backend**: Permitir que `addTracksToCustomProduct` en `customProduct.controller.ts` acepte metadatos de pistas incluso si no se adjuntan archivos binarios.
-- [ ] **Frontend**: Crear `customProductService.ts` para enviar datos de carátula y pistas.
-- [ ] **Frontend**: Modificar `CreatePage.tsx` para retener el archivo binario de la imagen y enviarlo mediante `FormData` al backend al finalizar el asistente.
+- [x] **Backend**: Permitir que `addTracksToCustomProduct` en `customProduct.controller.ts` acepte metadatos de pistas incluso si no se adjuntan archivos binarios.
+- [x] **Frontend**: Crear `customProductService.ts` para enviar datos de carátula y pistas.
+- [x] **Frontend**: Modificar `CreatePage.tsx` para retener el archivo binario de la imagen y enviarlo mediante `FormData` al backend al finalizar el asistente.
 
 ### Fase 5: Carrito de Compras Persistente
 - [ ] **Frontend**: Crear `cartService.ts` para conectar con `/api/cart/user/:user_id`, `/api/cart/items` y `/api/cart/items/:item_id`.
