@@ -117,11 +117,11 @@ flowchart TD
 - [x] **Frontend**: Implementar adaptadores/mapeadores (`src/shared/api/mappers.ts`) para transformar respuestas de la API a los tipos de la interfaz.
 
 ### Fase 2: Autenticación y Gestión de Sesión
-- [ ] **Backend**: Crear middleware `auth.middleware.ts` para verificar y decodificar el token JWT en las cabeceras `Authorization`.
-- [ ] **Backend**: Agregar endpoint `GET /api/auth/me` para retornar la información del usuario autenticado a partir del token.
-- [ ] **Frontend**: Crear `authService.ts` con funciones `login`, `register` y `getMe`.
-- [ ] **Frontend**: Actualizar `AuthContext.tsx` para almacenar `user_id`, `name`, `email`, `role` y `token`, validando la sesión en la carga inicial.
-- [ ] **Frontend**: Modificar `LoginPage.tsx` y `RegisterPage.tsx` para invocar al backend y mostrar mensajes de error dinámicos.
+- [x] **Backend**: Crear middleware `auth.middleware.ts` para verificar y decodificar el token JWT en las cabeceras `Authorization`.
+- [x] **Backend**: Agregar endpoint `GET /api/auth/me` para retornar la información del usuario autenticado a partir del token.
+- [x] **Frontend**: Crear `authService.ts` con funciones `login`, `register` y `getMe`.
+- [x] **Frontend**: Actualizar `AuthContext.tsx` para almacenar `user_id`, `name`, `email`, `role` y `token`, validando la sesión en la carga inicial.
+- [x] **Frontend**: Modificar `LoginPage.tsx` y `RegisterPage.tsx` para invocar al backend y mostrar mensajes de error dinámicos.
 
 ### Fase 3: Catálogo, Búsqueda y Detalle de Productos
 - [ ] **Backend**: Crear `category.controller.ts` y ruta `GET /api/categories` para exponer las categorías disponibles.
