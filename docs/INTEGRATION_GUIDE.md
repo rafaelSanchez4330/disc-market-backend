@@ -138,16 +138,16 @@ flowchart TD
 - [x] **Frontend**: Modificar `CreatePage.tsx` para retener el archivo binario de la imagen y enviarlo mediante `FormData` al backend al finalizar el asistente.
 
 ### Fase 5: Carrito de Compras Persistente
-- [ ] **Frontend**: Crear `cartService.ts` para conectar con `/api/cart/user/:user_id`, `/api/cart/items` y `/api/cart/items/:item_id`.
-- [ ] **Frontend**: Actualizar `CartContext.tsx` para sincronizar las altas, bajas y cambios de cantidad con la base de datos cuando exista sesión activa.
+- [x] **Frontend**: Crear `cartService.ts` para conectar con `/api/cart/user/:user_id`, `/api/cart/items` y `/api/cart/items/:item_id`.
+- [x] **Frontend**: Actualizar `CartContext.tsx` para sincronizar las altas, bajas y cambios de cantidad con la base de datos cuando exista sesión activa.
 
 ### Fase 6: Checkout y Órdenes de Compra
-- [ ] **Frontend**: Crear `orderService.ts` con la función `checkout(data)`.
-- [ ] **Frontend**: Conectar el botón "Ir a pagar" en `CartPage.tsx` para disparar la orden en `/api/orders/checkout`.
-- [ ] **Frontend**: Enviar la respuesta (`order_id`, `tracking_number`, `total_amount`) como estado de navegación hacia `OrderOkPage` para mostrar el resumen real de la compra.
+- [x] **Frontend**: Crear `orderService.ts` con la función `checkout(data)`.
+- [x] **Frontend**: Conectar el botón "Ir a pagar" en `CartPage.tsx` para disparar la orden en `/api/orders/checkout`.
+- [x] **Frontend**: Enviar la respuesta (`order_id`, `tracking_number`, `total_amount`) como estado de navegación hacia `OrderOkPage` para mostrar el resumen real de la compra.
 
 ### Fase 7: Validación y Pruebas
-- [ ] Validar flujo completo de registro y login de usuario.
-- [ ] Validar filtrado dinámico en catálogo desde la base de datos PostgreSQL.
-- [ ] Validar creación de disco personalizado con subida de archivo y comprobación en la carpeta local `uploads/`.
-- [ ] Validar flujo de carrito, checkout y generación de registros en las tablas `orders`, `order_items`, `payments` y `shipping`.
+- [x] Validar flujo completo de registro y login de usuario.
+- [x] Validar filtrado dinámico en catálogo desde la base de datos PostgreSQL.
+- [x] Validar creación de disco personalizado con subida de archivo y comprobación en la carpeta local `uploads/`.
+- [x] Validar flujo de carrito, checkout y generación de registros en las tablas `orders`, `order_items`, `payments` y `shipping`.

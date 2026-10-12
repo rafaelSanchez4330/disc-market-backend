@@ -113,6 +113,10 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
     }
 
     res.json({
+      user_id: user.user_id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
       user: {
         user_id: user.user_id,
         name: user.name,
