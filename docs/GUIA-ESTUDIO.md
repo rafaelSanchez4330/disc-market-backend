@@ -1,10 +1,10 @@
 # Guía de estudio: preguntas y respuestas de Disc Market
 
 Revisión: 16 de octubre de 2026, después de integrar `origin/main` en `yazmin`
-en ambos repositorios. Las respuestas describen el código revisado, no solo el
-diseño deseado. Stripe ya está en el código local actualizado; el VPS todavía
-ejecuta la versión anterior a esos cambios. No afirmar que los pagos nuevos ya
-están desplegados o probados de extremo a extremo.
+en ambos repositorios. Actualización posterior: Stripe ya está desplegado en el
+VPS en modo test, con migración aditiva y comprobaciones de autenticación y firma.
+Las respuestas describen el código revisado, no solo el diseño deseado. No se ha
+verificado un pago completo en el VPS ni una entrega real de eventos de Stripe.
 
 ## Presentación de un minuto
 
@@ -34,7 +34,7 @@ flowchart LR
     A -.->|PaymentIntent / webhook: código nuevo| S
 ```
 
-Las líneas de Stripe representan la integración nueva pendiente de despliegue.
+Las líneas de Stripe representan la integración en modo test.
 
 ## Tecnologías y responsabilidades
 
@@ -215,7 +215,7 @@ confirmación bancaria. No debe habilitarse así para ventas reales.
    registro de pago y envío; marca el carrito como convertido.
 7. El webhook `payment_intent.succeeded` también intenta consolidar la compra.
 
-Es el flujo leído en el código nuevo, todavía pendiente de desplegar y probar.
+Es el flujo del código desplegado; queda probarlo de extremo a extremo en el VPS.
 
 **24. ¿Qué datos de tarjeta almacenamos?**
 
@@ -248,8 +248,9 @@ misma cuenta y entorno. No cambiamos a claves reales durante esta revisión.
 
 El navegador puede cerrarse o perder conexión después del pago. Stripe puede
 notificar al servidor directamente. La firma debe verificarse con el cuerpo
-original, que `app.ts` conserva como `rawBody`. El código actual acepta eventos
-sin verificar cuando falta firma o secreto: debe rechazarlos en producción.
+original, que `app.ts` conserva como `rawBody`. La actualización de despliegue
+rechaza eventos sin firma o secreto y firmas inválidas. Si falla la consolidación,
+responde 500 para permitir reintentos de Stripe.
 
 **28. ¿El secreto de Stripe CLI sirve siempre para el VPS?**
 
@@ -264,8 +265,9 @@ Repetir la misma operación no debería duplicar el pedido. El código busca un
 pago por `transaction_id` antes de crearlo, pero no vemos una restricción única
 en esa columna ni una transacción completa que proteja dos solicitudes
 simultáneas. Por eso existe una protección parcial, no una garantía completa.
-También debe manejarse el reintento si el procesamiento del webhook falla:
-actualmente puede responder 200 aunque falle la creación del pedido.
+El webhook ahora devuelve 500 si falla la creación del pedido, para permitir
+reintentos; la recuperación consistente de escrituras parciales aún requiere
+la transacción y las restricciones mencionadas.
 
 **30. ¿El importe del navegador es confiable? ¿Qué moneda se usa?**
 
@@ -277,17 +279,18 @@ La moneda del catálogo y la del cobro deben acordarse antes de probar ventas.
 
 **31. ¿Qué falta para asegurar la compra?**
 
-Autenticar las rutas de pago; obtener identidad del JWT y verificar pertenencia
-del PaymentIntent; quitar fallback al primer usuario; guardar una instantánea
+Las rutas de pago ya exigen JWT, toman la identidad del token y confirm verifica
+la pertenencia del PaymentIntent; se quitó su fallback al primer usuario.
+Falta guardar una instantánea
 consistente de los artículos; validar inventario y precio; usar transacciones y
-unicidad para evitar duplicados; exigir firma del webhook y manejar sus reintentos.
+unicidad para evitar duplicados. El webhook ya exige firma y devuelve error si falla.
 El número de tracking generado es interno de demostración, no de una paquetería.
 
 **32. ¿Los cambios de Stripe necesitan modificar la base del VPS?**
 
-Sí: Payment añadió `transaction_id` y `receipt_url`. Como producción no
-sincroniza automáticamente, hay que preparar y aplicar una migración antes
-de desplegar el nuevo backend. Compilar o reiniciar no crea esas columnas.
+Sí: Payment añadió `transaction_id` y `receipt_url`. La migración aditiva ya se
+aplicó en este despliegue. Producción no sincroniza automáticamente:
+compilar o reiniciar no crea columnas de futuras versiones.
 
 ## Hosting y operación
 
@@ -419,8 +422,8 @@ Hoy no hay rollback automatizado ni CI/CD configurado.
 
 **48. ¿Qué limitaciones reconocemos con honestidad?**
 
-Es una demo con autorización incompleta, checkout alternativo simulado y pagos
-nuevos pendientes de validación. Hay riesgo de duplicados concurrentes,
+Es una demo con autorización incompleta en otras rutas, checkout alternativo
+simulado y pagos test pendientes de validación completa en el VPS. Hay riesgo de duplicados concurrentes,
 stock no reservado de forma atómica y precios personalizados que necesitan
 validación. HTTPS funciona, pero no corrige estas reglas del negocio.
 

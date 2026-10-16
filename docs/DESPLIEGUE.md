@@ -3,12 +3,36 @@
 Configuración realizada el 16 de octubre de 2026. Estado: demo pública con HTTPS;
 faltan las correcciones de autorización indicadas al final antes de admitir clientes reales.
 
-Posteriormente se integró `origin/main` en la rama local `yazmin` de ambos
-repositorios, incluyendo Stripe. Esa integración todavía no se desplegó:
-el VPS conserva la versión inicial descrita aquí. Payment añadió columnas
-`transaction_id` y `receipt_url`; preparar una migración antes del próximo
-despliegue. Configurar claves nuevas fuera de Git y el webhook del dominio;
-no reutilizar los secretos expuestos en capturas. Ver [guía de estudio](GUIA-ESTUDIO.md).
+La actualización de Stripe se desplegó el 16 de octubre de 2026 a las 07:33 UTC
+(01:33 en Ciudad de México), en modo test. Se aplicó la migración aditiva
+`scripts/deployment/stripe-schema.sql` para `transaction_id` y `receipt_url`.
+Las credenciales se transfirieron por SSH fuera de Git. Los secretos previamente
+compartidos deben rotarse. Ver [guía de estudio](GUIA-ESTUDIO.md).
+
+## Actualización Stripe: release 20261016T073316Z
+
+- Release: `/opt/disc-market/releases/20261016T073316Z`.
+- `/opt/disc-market/backend` enlaza al backend de la release; Nginx publica
+  `/var/www/disc-market`, enlazado al `frontend/dist` de la misma release.
+- El código de frontend de esta actualización está en esa release, no en la
+  carpeta original `/opt/disc-market/frontend` de la instalación inicial.
+- Backup previo: `/var/backups/disc-market/releases/20261016T073316Z/`;
+  incluye base, uploads, backend anterior, frontend publicado y configuración Nginx.
+- Versiones anteriores: `/opt/disc-market/backend-before-20261016T073316Z`
+  y `/var/www/disc-market-before-20261016T073316Z`.
+- El script `scripts/deployment/deploy-update.sh` compila antes de activar y
+  restaura los enlaces anteriores si falla la comprobación inicial de salud.
+- Se compararon los conteos de productos, usuarios y pedidos antes y después:
+  no cambiaron durante el despliegue. Uploads permanecen en su directorio persistente.
+- `create-intent` y `confirm` ahora exigen JWT; confirm comprueba el dueño del pago.
+  Webhooks sin firma, con firma inválida o sin secreto son rechazados.
+  Un fallo al consolidar el pedido por webhook devuelve 500 para permitir reintentos.
+- Se verificaron builds, frontend y bundle HTTPS, catálogo de ocho productos,
+  health OK, rechazo de peticiones anónimas y un webhook sintético firmado.
+- Stripe tiene un endpoint habilitado para `https://vinylhrz.tech/api/payments/webhook`.
+  La prueba sintética valida el secreto configurado, no demuestra una entrega
+  real desde Stripe. Falta verificar un pago test completo y su evento en el VPS.
+- No se realizó ningún cobro ni se activó modo live. La moneda del código sigue en USD.
 
 ## Repositorios y rama
 

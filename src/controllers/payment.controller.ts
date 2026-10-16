@@ -6,14 +6,12 @@ import { OrderItem } from '../entities/OrderItem';
 import { ShoppingCart } from '../entities/ShoppingCart';
 import { Payment } from '../entities/Payment';
 import { Shipping } from '../entities/Shipping';
-import { User } from '../entities/User';
 
 const orderRepo = AppDataSource.getRepository(Order);
 const orderItemRepo = AppDataSource.getRepository(OrderItem);
 const cartRepo = AppDataSource.getRepository(ShoppingCart);
 const paymentRepo = AppDataSource.getRepository(Payment);
 const shippingRepo = AppDataSource.getRepository(Shipping);
-const userRepo = AppDataSource.getRepository(User);
 
 const getStripe = (): Stripe => {
   const secretKey = process.env.STRIPE_SECRET_KEY;
@@ -127,12 +125,7 @@ async function processOrderFromPaymentIntent(paymentIntent: Stripe.PaymentIntent
 export const createPaymentIntent = async (req: Request, res: Response): Promise<void> => {
   try {
     const authReq = req as any;
-    let userId = authReq.user?.user_id || (req.body.user_id ? parseInt(req.body.user_id, 10) : null);
-
-    if (!userId) {
-      const firstUser = await userRepo.findOne({ order: { user_id: 'ASC' } });
-      userId = firstUser ? firstUser.user_id : null;
-    }
+    const userId = authReq.user?.user_id;
 
     if (!userId) {
       res.status(401).json({ message: 'Se requiere iniciar sesión para proceder al pago' });
@@ -210,6 +203,11 @@ export const confirmPayment = async (req: Request, res: Response): Promise<void>
     const stripe = getStripe();
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
+    if (paymentIntent.metadata.userId !== String((req as any).user?.user_id)) {
+      res.status(403).json({ message: 'No tienes acceso a este pago' });
+      return;
+    }
+
     if (paymentIntent.status !== 'succeeded') {
       res.status(400).json({
         message: `El pago aún no se ha completado. Estado actual: ${paymentIntent.status}`,
@@ -244,17 +242,16 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
 
   let event: Stripe.Event;
 
+  if (!webhookSecret || typeof sig !== 'string') {
+    res.status(400).json({ message: 'Webhook signature required' });
+    return;
+  }
+
   try {
     const stripe = getStripe();
     const rawBody = (req as any).rawBody || req.body;
 
-    if (webhookSecret && sig) {
-      event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
-    } else {
-      // Si aún no se configuró webhook secret en desarrollo local, parsear el body directamente
-      event = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-      console.warn('⚠️ Webhook recibido sin validación de firma (STRIPE_WEBHOOK_SECRET no configurada).');
-    }
+    event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
   } catch (err: any) {
     console.error(`❌ Error en webhook de Stripe: ${err.message}`);
     res.status(400).send(`Webhook Error: ${err.message}`);
@@ -269,6 +266,8 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
       await processOrderFromPaymentIntent(paymentIntent);
     } catch (orderError: any) {
       console.error('Error procesando orden desde webhook:', orderError);
+      res.status(500).json({ message: 'Payment processing failed; retry required' });
+      return;
     }
   } else if (event.type === 'payment_intent.payment_failed') {
     const paymentIntent = event.data.object as Stripe.PaymentIntent;
