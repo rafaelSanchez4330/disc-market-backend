@@ -7,7 +7,13 @@ const app: Application = express();
 
 // Middlewares globales
 app.use(cors({ origin: '*' }));
-app.use(express.json());
+app.use(
+  express.json({
+    verify: (req: any, _res, buf) => {
+      req.rawBody = buf;
+    },
+  })
+);
 app.use(express.urlencoded({ extended: true }));
 
 // Servir archivos estáticos subidos localmente (portadas y pistas de audio)
