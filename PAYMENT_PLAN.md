@@ -147,14 +147,14 @@ npm install @stripe/stripe-js @stripe/react-stripe-js
 
 ## 📌 Checklist de Tareas
 
-- [ ] **Fase 1:** Obtener claves de Stripe y configurar `.env` en ambos repos.
-- [ ] **Fase 2.1:** Instalar `stripe` en `disc-market-backend`.
-- [ ] **Fase 2.2:** Modificar `Payment.ts` para agregar `transaction_id`.
-- [ ] **Fase 2.3:** Configurar raw body middleware en `app.ts`.
-- [ ] **Fase 2.4:** Crear `payment.controller.ts` (`create-intent` y `webhook`).
-- [ ] **Fase 2.5:** Registrar rutas en `payment.routes.ts` y montarlas en `apiRoutes`.
-- [ ] **Fase 3.1:** Instalar `@stripe/stripe-js` y `@stripe/react-stripe-js` en `disc-market-frontend`.
-- [ ] **Fase 3.2:** Crear servicio de pagos en frontend (`payment.service.ts`).
-- [ ] **Fase 3.3:** Crear componente de checkout con Stripe Elements y tema `night`.
-- [ ] **Fase 3.4:** Conectar flujo en `CartPage.tsx` y redirigir a `OrderOkPage`.
+- [x] **Fase 1:** Obtener claves de Stripe y configurar `.env` en ambos repos.
+- [x] **Fase 2.1:** Instalar `stripe` en `disc-market-backend`.
+- [x] **Fase 2.2:** Modificar `Payment.ts` para agregar `transaction_id`.
+- [x] **Fase 2.3:** Configurar raw body middleware en `app.ts`.
+- [x] **Fase 2.4:** Crear `payment.controller.ts` (`create-intent`, `confirm` y `webhook`).
+- [x] **Fase 2.5:** Registrar rutas en `payment.routes.ts` y montarlas en `apiRoutes`.
+- [x] **Fase 3.1:** Instalar `@stripe/stripe-js` y `@stripe/react-stripe-js` en `disc-market-frontend`.
+- [x] **Fase 3.2:** Crear servicio de pagos en frontend (`paymentService.ts`).
+- [x] **Fase 3.3:** Crear componente de checkout con Stripe Elements y tema `night` (`StripeCheckoutModal.tsx`).
+- [x] **Fase 3.4:** Conectar flujo en `CartPage.tsx` y redirigir a `OrderOkPage`.
 - [ ] **Fase 4:** Realizar pruebas de flujo completo y verificar en PostgreSQL y Stripe Dashboard.

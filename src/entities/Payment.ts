@@ -29,6 +29,12 @@ export class Payment {
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   amount: number;
 
+  @Column({ type: 'varchar', length: 150, nullable: true })
+  transaction_id: string | null;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  receipt_url: string | null;
+
   @CreateDateColumn({ name: 'created_at' })
   created_at: Date;
 }
