@@ -8,7 +8,7 @@ const inventoryRepository = AppDataSource.getRepository(Inventory);
 
 export const getProducts = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { format, artist, search, category_id } = req.query;
+    const { format, artist, search, category_id, category } = req.query;
 
     const query = productRepository
       .createQueryBuilder('product')
@@ -36,8 +36,19 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
       query.andWhere('product.category_id = :category_id', { category_id });
     }
 
+    if (category) {
+      query.andWhere('LOWER(category.category_name) = LOWER(:category)', { category });
+    }
+
     const products = await query.getMany();
-    res.json(products);
+
+    // Asegurar que price sea un número JavaScript
+    const formattedProducts = products.map((p) => ({
+      ...p,
+      price: Number(p.price),
+    }));
+
+    res.json(formattedProducts);
   } catch (error: any) {
     res.status(500).json({ message: 'Error al obtener productos', error: error.message });
   }
@@ -56,7 +67,10 @@ export const getProductById = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    res.json(product);
+    res.json({
+      ...product,
+      price: Number(product.price),
+    });
   } catch (error: any) {
     res.status(500).json({ message: 'Error al obtener producto', error: error.message });
   }

@@ -95,3 +95,37 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ message: 'Error en inicio de sesión', error: error.message });
   }
 };
+
+export const getMe = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const authReq = req as any;
+    const userId = authReq.user?.user_id;
+
+    if (!userId) {
+      res.status(401).json({ message: 'Usuario no autenticado' });
+      return;
+    }
+
+    const user = await userRepository.findOne({ where: { user_id: userId } });
+    if (!user) {
+      res.status(404).json({ message: 'Usuario no encontrado' });
+      return;
+    }
+
+    res.json({
+      user_id: user.user_id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      user: {
+        user_id: user.user_id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Error al obtener perfil', error: error.message });
+  }
+};
+

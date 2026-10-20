@@ -1,0 +1,272 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#020617" />
+    </linearGradient>
+
+    <!-- Card Gradients -->
+    <linearGradient id="frontCardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+
+    <linearGradient id="backCardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+
+    <linearGradient id="dbCardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+
+    <!-- Accent Highlights -->
+    <linearGradient id="frontHeader" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#818cf8" />
+    </linearGradient>
+
+    <linearGradient id="backHeader" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#34d399" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+
+    <linearGradient id="dbHeader" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+
+    <!-- Arrow Marker -->
+    <marker id="arrowRight" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#38bdf8" />
+    </marker>
+    <marker id="arrowRightDb" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#34d399" />
+    </marker>
+    <marker id="arrowBi" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#94a3b8" />
+    </marker>
+
+    <!-- Shadow -->
+    <filter id="dropGlow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000" flood-opacity="0.45" />
+    </filter>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="960" height="540" rx="16" fill="url(#bgGrad)" stroke="#334155" stroke-width="1.5" />
+
+  <!-- Title & Subtitle -->
+  <text x="40" y="44" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="20" font-weight="700" fill="#f8fafc">
+    Arquitectura de Comunicación - Disc Market
+  </text>
+  <text x="40" y="68" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" fill="#94a3b8">
+    Flujo de integración entre SPA Frontend, API Backend y Base de Datos PostgreSQL
+  </text>
+
+  <!-- ==================== FRONTEND COLUMN ==================== -->
+  <g filter="url(#dropGlow)">
+    <rect x="40" y="95" width="260" height="405" rx="14" fill="url(#frontCardGrad)" stroke="#38bdf8" stroke-width="1.5" />
+    <!-- Header Bar -->
+    <rect x="40" y="95" width="260" height="44" rx="14" fill="url(#frontHeader)" />
+    <rect x="40" y="125" width="260" height="14" fill="url(#frontHeader)" />
+    <text x="56" y="122" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" fill="#0f172a">
+      disc-market-frontend
+    </text>
+    <rect x="235" y="107" width="52" height="20" rx="6" fill="#0f172a" fill-opacity="0.25" />
+    <text x="243" y="121" font-family="monospace" font-size="10" font-weight="700" fill="#0f172a">:5173</text>
+  </g>
+
+  <!-- Frontend Nodes -->
+  <!-- Node 1: UI Pages -->
+  <rect x="56" y="152" width="228" height="64" rx="8" fill="#0f172a" stroke="#334155" stroke-width="1" />
+  <text x="68" y="172" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#e2e8f0">
+    🖥️ UI Components &amp; Pages
+  </text>
+  <text x="68" y="190" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#94a3b8">
+    Catalog, ProductPage, CreatePage
+  </text>
+  <text x="68" y="204" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#94a3b8">
+    CartPage, LoginPage, RegisterPage
+  </text>
+
+  <!-- Node 2: Global State -->
+  <rect x="56" y="230" width="228" height="54" rx="8" fill="#0f172a" stroke="#334155" stroke-width="1" />
+  <text x="68" y="250" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#e2e8f0">
+    ⚡ Contexts (Global State)
+  </text>
+  <text x="68" y="270" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#94a3b8">
+    AuthContext (Token) · CartContext
+  </text>
+
+  <!-- Node 3: Data Mappers -->
+  <rect x="56" y="298" width="228" height="54" rx="8" fill="#0f172a" stroke="#334155" stroke-width="1" />
+  <text x="68" y="318" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#e2e8f0">
+    🔄 Data Mappers (DTOs)
+  </text>
+  <text x="68" y="338" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#94a3b8">
+    snake_case ➔ camelCase · Price (num)
+  </text>
+
+  <!-- Node 4: API Client -->
+  <rect x="56" y="366" width="228" height="66" rx="8" fill="#0f172a" stroke="#38bdf8" stroke-width="1.2" />
+  <text x="68" y="386" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#38bdf8">
+    🌐 apiClient (fetch / services)
+  </text>
+  <text x="68" y="404" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#94a3b8">
+    Bearer JWT Injection · Headers
+  </text>
+  <text x="68" y="420" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#94a3b8">
+    authService, productService, cart...
+  </text>
+
+  <rect x="56" y="446" width="228" height="38" rx="6" fill="#1e293b" />
+  <text x="66" y="468" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#cbd5e1">
+    Stack: React 19 + Vite + Tailwind v4
+  </text>
+
+
+  <!-- ==================== BACKEND COLUMN ==================== -->
+  <g filter="url(#dropGlow)">
+    <rect x="360" y="95" width="270" height="405" rx="14" fill="url(#backCardGrad)" stroke="#34d399" stroke-width="1.5" />
+    <!-- Header Bar -->
+    <rect x="360" y="95" width="270" height="44" rx="14" fill="url(#backHeader)" />
+    <rect x="360" y="125" width="270" height="14" fill="url(#backHeader)" />
+    <text x="376" y="122" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" fill="#064e3b">
+      disc-market-backend
+    </text>
+    <rect x="565" y="107" width="52" height="20" rx="6" fill="#064e3b" fill-opacity="0.25" />
+    <text x="573" y="121" font-family="monospace" font-size="10" font-weight="700" fill="#064e3b">:5000</text>
+  </g>
+
+  <!-- Backend Nodes -->
+  <!-- Node 1: Routers -->
+  <rect x="376" y="152" width="238" height="64" rx="8" fill="#0f172a" stroke="#334155" stroke-width="1" />
+  <text x="388" y="172" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#e2e8f0">
+    🚦 Express Routers (/api/*)
+  </text>
+  <text x="388" y="190" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#94a3b8">
+    /auth, /products, /categories
+  </text>
+  <text x="388" y="204" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#94a3b8">
+    /cart, /orders, /custom-products
+  </text>
+
+  <!-- Node 2: Middlewares -->
+  <rect x="376" y="226" width="238" height="58" rx="8" fill="#0f172a" stroke="#334155" stroke-width="1" />
+  <text x="388" y="246" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#e2e8f0">
+    🛡️ Middlewares
+  </text>
+  <text x="388" y="264" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#94a3b8">
+    • auth.middleware (Valida JWT)
+  </text>
+  <text x="388" y="277" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#94a3b8">
+    • upload.middleware (Multer / Archivos)
+  </text>
+
+  <!-- Node 3: Controllers -->
+  <rect x="376" y="294" width="238" height="58" rx="8" fill="#0f172a" stroke="#334155" stroke-width="1" />
+  <text x="388" y="314" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#e2e8f0">
+    ⚙️ Business Logic (Controllers)
+  </text>
+  <text x="388" y="332" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#94a3b8">
+    Auth, Products, Cart, Checkout,
+  </text>
+  <text x="388" y="345" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#94a3b8">
+    Custom Discs &amp; Audio Processing
+  </text>
+
+  <!-- Node 4: TypeORM & DataSource -->
+  <rect x="376" y="362" width="238" height="70" rx="8" fill="#0f172a" stroke="#34d399" stroke-width="1.2" />
+  <text x="388" y="382" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#34d399">
+    📦 TypeORM (AppDataSource)
+  </text>
+  <text x="388" y="400" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#94a3b8">
+    12 Entidades mapeadas
+  </text>
+  <text x="388" y="416" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#94a3b8">
+    Relaciones: 1:N, 1:1, N:1 &amp; Queries
+  </text>
+
+  <rect x="376" y="446" width="238" height="38" rx="6" fill="#1e293b" />
+  <text x="388" y="468" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#cbd5e1">
+    Stack: Express 4 + TypeScript + TypeORM
+  </text>
+
+
+  <!-- ==================== DATABASE COLUMN ==================== -->
+  <g filter="url(#dropGlow)">
+    <rect x="680" y="95" width="240" height="405" rx="14" fill="url(#dbCardGrad)" stroke="#f59e0b" stroke-width="1.5" />
+    <!-- Header Bar -->
+    <rect x="680" y="95" width="240" height="44" rx="14" fill="url(#dbHeader)" />
+    <rect x="680" y="125" width="240" height="14" fill="url(#dbHeader)" />
+    <text x="696" y="122" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" fill="#451a03">
+      PostgreSQL (Docker)
+    </text>
+    <rect x="855" y="107" width="52" height="20" rx="6" fill="#451a03" fill-opacity="0.25" />
+    <text x="863" y="121" font-family="monospace" font-size="10" font-weight="700" fill="#451a03">:5432</text>
+  </g>
+
+  <!-- Database Nodes -->
+  <!-- Node 1: Base de datos -->
+  <rect x="696" y="152" width="208" height="54" rx="8" fill="#0f172a" stroke="#334155" stroke-width="1" />
+  <text x="708" y="172" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#f59e0b">
+    🗄️ disc_market_db
+  </text>
+  <text x="708" y="192" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#94a3b8">
+    Contenedor: disc_market_postgres
+  </text>
+
+  <!-- Node 2: Tablas principales -->
+  <rect x="696" y="218" width="208" height="134" rx="8" fill="#0f172a" stroke="#334155" stroke-width="1" />
+  <text x="708" y="238" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#e2e8f0">
+    📊 12 Tablas Relacionales
+  </text>
+  <text x="708" y="258" font-family="monospace" font-size="10" fill="#94a3b8">• users, categories</text>
+  <text x="708" y="274" font-family="monospace" font-size="10" fill="#94a3b8">• products, inventory</text>
+  <text x="708" y="290" font-family="monospace" font-size="10" fill="#94a3b8">• custom_products, tracks</text>
+  <text x="708" y="306" font-family="monospace" font-size="10" fill="#94a3b8">• shopping_carts, cart_items</text>
+  <text x="708" y="322" font-family="monospace" font-size="10" fill="#94a3b8">• orders, order_items</text>
+  <text x="708" y="338" font-family="monospace" font-size="10" fill="#94a3b8">• payments, shipping</text>
+
+  <!-- Node 3: Almacenamiento local de archivos -->
+  <rect x="696" y="362" width="208" height="70" rx="8" fill="#0f172a" stroke="#334155" stroke-width="1" />
+  <text x="708" y="382" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#e2e8f0">
+    📁 Sistema de Archivos
+  </text>
+  <text x="708" y="400" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#94a3b8">
+    uploads/covers (JPG/PNG)
+  </text>
+  <text x="708" y="416" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#94a3b8">
+    uploads/tracks (MP3/WAV)
+  </text>
+
+  <rect x="696" y="446" width="208" height="38" rx="6" fill="#1e293b" />
+  <text x="708" y="468" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#cbd5e1">
+    Engine: PostgreSQL 16 Alpine
+  </text>
+
+
+  <!-- ==================== CONNECTION ARROWS ==================== -->
+  <!-- Line 1: Frontend -> Backend (HTTP REST / JSON) -->
+  <path d="M 300 200 L 352 200" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="4 3" marker-end="url(#arrowRight)" />
+  <rect x="303" y="180" width="46" height="16" rx="4" fill="#0f172a" stroke="#38bdf8" stroke-width="0.8" />
+  <text x="307" y="192" font-family="monospace" font-size="8.5" font-weight="700" fill="#38bdf8">REST</text>
+
+  <!-- Line 2: Frontend -> Backend (Bearer JWT / Auth) -->
+  <path d="M 300 395 L 352 395" stroke="#818cf8" stroke-width="2.5" marker-end="url(#arrowRight)" />
+  <rect x="303" y="375" width="46" height="16" rx="4" fill="#0f172a" stroke="#818cf8" stroke-width="0.8" />
+  <text x="312" y="387" font-family="monospace" font-size="8.5" font-weight="700" fill="#818cf8">JWT</text>
+
+  <!-- Line 3: Backend -> Database (SQL Queries) -->
+  <path d="M 630 395 L 672 395" stroke="#34d399" stroke-width="2.5" marker-end="url(#arrowRightDb)" />
+  <rect x="636" y="375" width="38" height="16" rx="4" fill="#0f172a" stroke="#34d399" stroke-width="0.8" />
+  <text x="643" y="387" font-family="monospace" font-size="8.5" font-weight="700" fill="#34d399">SQL</text>
+
+  <!-- Line 4: Backend -> DB Local files (Uploads) -->
+  <path d="M 630 260 L 672 260" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arrowBi)" />
+  <rect x="633" y="242" width="44" height="16" rx="4" fill="#0f172a" stroke="#f59e0b" stroke-width="0.8" />
+  <text x="637" y="254" font-family="monospace" font-size="8" font-weight="700" fill="#f59e0b">FILES</text>
+</svg>

@@ -5,20 +5,35 @@ import { OrderItem } from '../entities/OrderItem';
 import { ShoppingCart } from '../entities/ShoppingCart';
 import { Payment } from '../entities/Payment';
 import { Shipping } from '../entities/Shipping';
+import { User } from '../entities/User';
 
 const orderRepo = AppDataSource.getRepository(Order);
 const orderItemRepo = AppDataSource.getRepository(OrderItem);
 const cartRepo = AppDataSource.getRepository(ShoppingCart);
 const paymentRepo = AppDataSource.getRepository(Payment);
 const shippingRepo = AppDataSource.getRepository(Shipping);
+const userRepo = AppDataSource.getRepository(User);
 
 export const checkout = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { user_id, payment_method, shipping_method, shipping_address } = req.body;
+    const authReq = req as any;
+    let userId = authReq.user?.user_id || (req.body.user_id ? parseInt(req.body.user_id, 10) : null);
+
+    if (!userId) {
+      const firstUser = await userRepo.findOne({ order: { user_id: 'ASC' } });
+      userId = firstUser ? firstUser.user_id : null;
+    }
+
+    if (!userId) {
+      res.status(401).json({ message: 'Se requiere iniciar sesión para completar la compra' });
+      return;
+    }
+
+    const { payment_method, shipping_method } = req.body;
 
     const cart = await cartRepo.findOne({
-      where: { user_id: parseInt(user_id, 10), status: 'active' },
-      relations: ['cart_items'],
+      where: { user_id: userId, status: 'active' },
+      relations: ['cart_items', 'cart_items.product', 'cart_items.custom_product'],
     });
 
     if (!cart || cart.cart_items.length === 0) {
@@ -33,7 +48,7 @@ export const checkout = async (req: Request, res: Response): Promise<void> => {
 
     // 1. Crear Orden
     const newOrder = orderRepo.create({
-      user_id: parseInt(user_id, 10),
+      user_id: userId,
       total_amount,
       order_status: 'processing',
       payment_status: 'paid',
@@ -65,13 +80,13 @@ export const checkout = async (req: Request, res: Response): Promise<void> => {
     const tracking_number = `TRK-${Date.now().toString().slice(-6)}-${Math.floor(1000 + Math.random() * 9000)}`;
     const shipping = shippingRepo.create({
       order_id: savedOrder.order_id,
-      shipping_method: shipping_method || 'Standard Delivery',
+      shipping_method: shipping_method || 'Entrega Estándar',
       tracking_number,
       shipping_status: 'in_preparation',
     });
     await shippingRepo.save(shipping);
 
-    // 5. Marcar carrito como convertido
+    // 5. Marcar carrito actual como convertido
     cart.status = 'converted';
     await cartRepo.save(cart);
 
@@ -105,7 +120,10 @@ export const getOrderById = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
-    res.json(order);
+    res.json({
+      ...order,
+      total_amount: Number(order.total_amount),
+    });
   } catch (error: any) {
     res.status(500).json({ message: 'Error al consultar la orden', error: error.message });
   }
