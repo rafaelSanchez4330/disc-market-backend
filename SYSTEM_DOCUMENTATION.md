@@ -232,3 +232,35 @@ erDiagram
 | **Seguridad** | `bcrypt` + `jsonwebtoken` | Hashing criptográfico de contraseñas y autenticación por tokens |
 | **Archivos** | Multer | Procesamiento de formularios `multipart/form-data` para portadas y audios |
 | **Pagos (Server)** | Stripe Node SDK | Creación de intenciones de cobro y validación de webhooks |
+
+---
+
+## 🚀 5. Funcionalidades Pendientes y Hoja de Ruta (Roadmap)
+
+Para una especificación exhaustiva que incluye modelos de datos SQL, diagramas de secuencia de autorización, arquitectura de verificación acústica de copyright y planes de mitigación de bugs, consulte el documento maestro:
+👉 [**PENDING_FEATURES.md**](./PENDING_FEATURES.md)
+
+### Resumen de Módulos Pendientes:
+1. **🛡️ Usuario Administrador y Roles (RBAC):**
+   * Middleware de autenticación y autorización JWT (`authMiddleware`, `requireRole(['admin'])`).
+   * Endpoints de catálogo para mutación (`PUT /api/products/:id`, `PATCH /api/products/:id/quick-edit`, `DELETE /api/products/:id`).
+   * Panel de administración en Frontend (`/admin/productos`) para editar precios, descripciones, stock y altas de catálogo.
+2. **⚙️ Configuraciones de Usuario y Preferencias:**
+   * Entidad y tabla `user_preferences` (dirección predeterminada de envío, teléfono, preferencia de formato musical y notificaciones).
+   * Endpoints `GET/PUT /api/users/profile`, `PUT /api/users/preferences`, `PUT /api/users/password`.
+   * Vista de perfil de usuario (`/perfil`) con pestañas de información, seguridad y direcciones guardadas.
+3. **🎵 Subida de Audios y Validación de Copyright:**
+   * Creador de discos personalizados (`/crear`) con uploader real de archivos (`.mp3`, `.wav`, `.flac`) y reproductor de preescucha.
+   * Validación de límites de tiempo según formato (44 min vinilo, 80 min CD).
+   * Sistema de detección de copyright en 3 capas: huella acústica automatizada (AcoustID / Chromaprint o AudD API), declaración jurada legal firmada digitalmente y auditoría de máster.
+4. **📦 Gestión Integral de Inventarios:**
+   * Control de stock mínimo (`min_threshold`), alertas de rotura de inventario y registro histórico de movimientos (Kardex: compras, ventas, ajustes, mermas).
+   * Prevención de sobreventa (concurrencia) mediante reserva temporal de stock con bloqueo a nivel de fila (`SELECT ... FOR UPDATE`) durante el checkout.
+   * Vista de monitoreo de existencias para administradores (`/admin/inventario`).
+5. **🐛 Corrección de Errores y Estabilización:**
+   * Protección de endpoints actualmente desprotegidos.
+   * Sustitución de precios hardcodeados en personalización por consulta dinámica a base de datos.
+   * Limpieza de archivos huérfanos en `uploads/` cuando falle la transacción en PostgreSQL.
+   * Resiliencia y sincronización automática del carrito dual ante fallos de conexión.
+   * Sanitización de nombres de archivo y validación por Magic Bytes.
+
