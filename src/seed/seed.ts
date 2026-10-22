@@ -1,7 +1,14 @@
+import bcrypt from 'bcrypt';
 import { AppDataSource } from '../config/data-source';
 import { Product } from '../entities/Product';
 import { Category } from '../entities/Category';
 import { Inventory } from '../entities/Inventory';
+import { User } from '../entities/User';
+import { UserPreference } from '../entities/UserPreference';
+import { Order } from '../entities/Order';
+import { OrderItem } from '../entities/OrderItem';
+import { Payment } from '../entities/Payment';
+import { Shipping } from '../entities/Shipping';
 
 export const runSeed = async () => {
   if (!AppDataSource.isInitialized) {
@@ -12,8 +19,16 @@ export const runSeed = async () => {
   const categoryRepo = AppDataSource.getRepository(Category);
   const productRepo = AppDataSource.getRepository(Product);
   const inventoryRepo = AppDataSource.getRepository(Inventory);
+  const userRepo = AppDataSource.getRepository(User);
+  const prefRepo = AppDataSource.getRepository(UserPreference);
+  const orderRepo = AppDataSource.getRepository(Order);
+  const orderItemRepo = AppDataSource.getRepository(OrderItem);
+  const paymentRepo = AppDataSource.getRepository(Payment);
+  const shippingRepo = AppDataSource.getRepository(Shipping);
 
-  // Categorías iniciales (Buscar o crear para evitar duplicados)
+  // =========================================================================
+  // 1. CATEGORÍAS INICIALES
+  // =========================================================================
   const categoryNames = ['Rock', 'Pop', 'Electronica', 'Latin'];
   const categoriesMap: Record<string, Category> = {};
 
@@ -26,7 +41,9 @@ export const runSeed = async () => {
     categoriesMap[name] = cat;
   }
 
-  // Catálogo completo de productos de muestra
+  // =========================================================================
+  // 2. CATÁLOGO DE PRODUCTOS E INVENTARIO
+  // =========================================================================
   const sampleProducts = [
     {
       name: 'Thriller',
@@ -110,6 +127,8 @@ export const runSeed = async () => {
     },
   ];
 
+  const savedProductsMap: Record<string, Product> = {};
+
   for (const item of sampleProducts) {
     let p = await productRepo.findOne({ where: { name: item.name } });
 
@@ -132,12 +151,11 @@ export const runSeed = async () => {
       });
       await inventoryRepo.save(inv);
     } else {
-      // Actualizar datos de inventario e imagen si ya existía
       p.price = item.price;
       p.image_url = item.image_url;
       p.description = item.description;
       p.category = item.category;
-      await productRepo.save(p);
+      p = await productRepo.save(p);
 
       let inv = await inventoryRepo.findOne({ where: { product_id: p.product_id } });
       if (!inv) {
@@ -151,9 +169,179 @@ export const runSeed = async () => {
       }
       await inventoryRepo.save(inv);
     }
+
+    savedProductsMap[item.name] = p;
   }
 
   console.log(`✅ Catálogo inicial sincronizado: ${sampleProducts.length} productos listos en PostgreSQL.`);
+
+  // =========================================================================
+  // 3. USUARIOS DE PRUEBA Y PREFERENCIAS
+  // =========================================================================
+  console.log('👤 Creando/sincronizando usuarios demo...');
+
+  // 3.1 Usuario Administrador
+  const adminEmail = 'admin@discmarket.com';
+  let adminUser = await userRepo.findOne({ where: { email: adminEmail } });
+  if (!adminUser) {
+    const adminPasswordHash = await bcrypt.hash('Admin123!', 10);
+    adminUser = userRepo.create({
+      name: 'Administrador Disc Market',
+      email: adminEmail,
+      password_hash: adminPasswordHash,
+      role: 'admin',
+    });
+    adminUser = await userRepo.save(adminUser);
+    console.log('  👑 Usuario administrador creado: admin@discmarket.com / Admin123!');
+  }
+
+  let adminPref = await prefRepo.findOne({ where: { user_id: adminUser.user_id } });
+  if (!adminPref) {
+    adminPref = prefRepo.create({
+      user_id: adminUser.user_id,
+      preferred_format: 'ALL',
+      theme: 'dark',
+      avatar_url: '📻',
+      default_country: 'México',
+    });
+    await prefRepo.save(adminPref);
+  }
+
+  // 3.2 Usuario Cliente Demo
+  const demoEmail = 'demo@discmarket.com';
+  let demoUser = await userRepo.findOne({ where: { email: demoEmail } });
+  if (!demoUser) {
+    const demoPasswordHash = await bcrypt.hash('Demo123!', 10);
+    demoUser = userRepo.create({
+      name: 'Rafael Demo',
+      email: demoEmail,
+      password_hash: demoPasswordHash,
+      role: 'customer',
+    });
+    demoUser = await userRepo.save(demoUser);
+    console.log('  🎧 Usuario demo cliente creado: demo@discmarket.com / Demo123!');
+  }
+
+  // Preferencias precargadas para el cliente demo
+  let demoPref = await prefRepo.findOne({ where: { user_id: demoUser.user_id } });
+  if (!demoPref) {
+    demoPref = prefRepo.create({
+      user_id: demoUser.user_id,
+      phone: '+52 55 1234 5678',
+      preferred_format: 'VINYL',
+      theme: 'dark',
+      notify_order_status: true,
+      notify_newsletter: true,
+      default_address_line1: 'Av. Insurgentes Sur 1450, Depto 4B',
+      default_address_line2: 'Col. Actipan, entre Río Mixcoac y Parroquia',
+      default_city: 'Benito Juárez, CDMX',
+      default_state: 'Ciudad de México',
+      default_postal_code: '03230',
+      default_country: 'México',
+      avatar_url: '🎧',
+    });
+    await prefRepo.save(demoPref);
+    console.log('  📍 Dirección y preferencias demo registradas para demo@discmarket.com');
+  }
+
+  // =========================================================================
+  // 4. HISTORIAL DE PEDIDOS DE PRUEBA PARA demo@discmarket.com
+  // =========================================================================
+  const existingOrders = await orderRepo.find({ where: { user_id: demoUser.user_id } });
+
+  if (existingOrders.length === 0) {
+    console.log('📦 Generando órdenes de prueba en el historial del cliente demo...');
+
+    // Pedido 1: Entregado (Daft Punk + Michael Jackson)
+    const order1 = orderRepo.create({
+      user_id: demoUser.user_id,
+      total_amount: 1598.0,
+      order_status: 'delivered',
+      payment_status: 'paid',
+    });
+    const savedOrder1 = await orderRepo.save(order1);
+
+    const daftPunkProduct = savedProductsMap['Random Access Memories'];
+    const thrillerProduct = savedProductsMap['Thriller'];
+
+    if (daftPunkProduct && thrillerProduct) {
+      await orderItemRepo.save([
+        orderItemRepo.create({
+          order_id: savedOrder1.order_id,
+          product_id: daftPunkProduct.product_id,
+          quantity: 1,
+          unit_price: daftPunkProduct.price,
+        }),
+        orderItemRepo.create({
+          order_id: savedOrder1.order_id,
+          product_id: thrillerProduct.product_id,
+          quantity: 1,
+          unit_price: thrillerProduct.price,
+        }),
+      ]);
+    }
+
+    await paymentRepo.save(
+      paymentRepo.create({
+        order_id: savedOrder1.order_id,
+        payment_method: 'credit_card',
+        payment_status: 'completed',
+        amount: 1598.0,
+      })
+    );
+
+    await shippingRepo.save(
+      shippingRepo.create({
+        order_id: savedOrder1.order_id,
+        shipping_method: 'Envío Express Disc Market',
+        tracking_number: 'TRK-892145-4120',
+        shipping_status: 'delivered',
+      })
+    );
+
+    // Pedido 2: En preparación (Abbey Road)
+    const order2 = orderRepo.create({
+      user_id: demoUser.user_id,
+      total_amount: 799.0,
+      order_status: 'processing',
+      payment_status: 'paid',
+    });
+    const savedOrder2 = await orderRepo.save(order2);
+
+    const abbeyRoadProduct = savedProductsMap['Abbey Road'];
+    if (abbeyRoadProduct) {
+      await orderItemRepo.save(
+        orderItemRepo.create({
+          order_id: savedOrder2.order_id,
+          product_id: abbeyRoadProduct.product_id,
+          quantity: 1,
+          unit_price: abbeyRoadProduct.price,
+        })
+      );
+    }
+
+    await paymentRepo.save(
+      paymentRepo.create({
+        order_id: savedOrder2.order_id,
+        payment_method: 'credit_card',
+        payment_status: 'completed',
+        amount: 799.0,
+      })
+    );
+
+    await shippingRepo.save(
+      shippingRepo.create({
+        order_id: savedOrder2.order_id,
+        shipping_method: 'Envío Estándar',
+        tracking_number: 'TRK-904321-7845',
+        shipping_status: 'in_preparation',
+      })
+    );
+
+    console.log('  ✅ 2 órdenes de prueba asociadas a demo@discmarket.com');
+  }
+
+  console.log('✨ Seed completado con éxito.');
   await AppDataSource.destroy();
 };
 

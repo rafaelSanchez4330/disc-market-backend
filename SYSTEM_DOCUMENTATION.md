@@ -273,7 +273,36 @@ erDiagram
 
 ---
 
-## 🚀 5. Funcionalidades Pendientes y Hoja de Ruta (Roadmap)
+## 🧪 5. Datos de Prueba y Cuentas Semilla (Seeding)
+
+Para facilitar pruebas manuales y evaluación de flujos de compra, el proyecto incluye un script de inicialización (`src/seed/seed.ts`), ejecutable mediante:
+
+```bash
+npm run seed
+```
+
+### 5.1. Cuentas de Usuario de Prueba
+| Rol | Correo Electrónico | Contraseña | Configuración y Datos Iniciales |
+| :--- | :--- | :--- | :--- |
+| **Cliente Demo** | `demo@discmarket.com` | `Demo123!` | • Nombre: *Rafael Demo*<br>• Avatar: `🎧`<br>• Teléfono: `+52 55 1234 5678`<br>• Dirección de entrega guardada en Benito Juárez, CDMX (autocompleta checkout)<br>• Formato favorito: `VINYL`<br>• 2 órdenes históricas asociadas con guías `TRK-...` |
+| **Administrador** | `admin@discmarket.com` | `Admin123!` | • Nombre: *Administrador Disc Market*<br>• Avatar: `📻`<br>• Rol: `admin`<br>• Permisos elevados de catálogo |
+
+### 5.2. Historial de Órdenes del Cliente Demo
+1. **Pedido #1 (Entregado):**
+   * Artículos: *Random Access Memories* (Vinilo, $899.00) + *Thriller* (Vinilo, $699.00).
+   * Total: $1,598.00 MXN.
+   * Envío: *Envío Express Disc Market*, Guía oficial: `TRK-892145-4120`, Estado: `delivered`.
+2. **Pedido #2 (En Preparación):**
+   * Artículos: *Abbey Road* (Vinilo, $799.00).
+   * Total: $799.00 MXN.
+   * Envío: *Envío Estándar*, Guía oficial: `TRK-904321-7845`, Estado: `in_preparation`.
+
+### 5.3. Catálogo de Discos de Muestra
+8 títulos icónicos del catálogo (*Thriller*, *30*, *Back in Black*, *Abbey Road*, *The Dark Side of the Moon*, *Un Verano Sin Ti*, *Random Access Memories*, *Sour*) en formatos Vinilo y CD con stock en inventario y carátulas de alta definición.
+
+---
+
+## 🚀 6. Funcionalidades Pendientes y Hoja de Ruta (Roadmap)
 
 Para una especificación exhaustiva que incluye modelos de datos SQL, diagramas de secuencia de autorización, arquitectura de verificación acústica de copyright y planes de mitigación de bugs, consulte el documento maestro:
 👉 [**PENDING_FEATURES.md**](./PENDING_FEATURES.md)
