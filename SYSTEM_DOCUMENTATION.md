@@ -130,6 +130,26 @@ Implementación bajo el estándar **PCI-DSS Compliant** usando **Stripe Elements
 
 ---
 
+### ⚙️ 2.7. Módulo de Perfil, Configuraciones y Preferencias de Usuario
+Permite al usuario gestionar su identidad, seguridad, datos logísticos y personalización de su experiencia:
+* **Endpoints de Usuario (`/api/users/*`):**
+  * `GET /api/users/profile`: Devuelve la información de cuenta, preferencias del usuario (inicializadas automáticamente si es la primera vez) y estadísticas históricas (total de pedidos, total invertido y fecha del último pedido).
+  * `PUT /api/users/profile`: Actualiza nombre público, teléfono de contacto y avatar personalizado (soporta presets temáticos de audio/vinilo o URL externa).
+  * `PUT /api/users/password`: Permite cambiar la contraseña verificando la contraseña actual mediante `bcrypt.compare` y aplicando validación de longitud mínima antes de hashear la nueva contraseña.
+  * `PUT /api/users/preferences`: Guarda la dirección de entrega por defecto (calle, número, colonia, ciudad, estado, CP, país), formato musical predilecto (`VINYL`, `CD`, `ALL`), tema visual y toggles de notificaciones por correo.
+  * `GET /api/users/orders`: Provee el listado completo de pedidos del usuario autenticado con detalles de cada producto, precios y estatus de logística.
+* **Interfaz de Usuario en Frontend (`/perfil`):**
+  * **Cabecera de Perfil:** Avatar dinámico, rol de cuenta, fecha de registro y tarjetas de métricas en tiempo real.
+  * **Pestaña 1 · Datos Personales:** Formulario de datos con selector de avatares temáticos e indicador de cuenta verificada.
+  * **Pestaña 2 · Dirección de Entrega:** Formulario de domicilio sincronizado con una previsualización interactiva estilo etiqueta física de paquetería.
+  * **Pestaña 3 · Preferencias & Formato:** Selección del soporte físico predilecto, tema de interfaz y suscripción a alertas de pedidos y lanzamientos.
+  * **Pestaña 4 · Seguridad:** Cambio de credenciales con medidor visual dinámico de fortaleza de contraseña en tiempo real.
+  * **Pestaña 5 · Mis Pedidos:** Historial cronológico con badges de estado (`En Preparación`, `Enviado`, etc.), desglose de productos y botón para copiar la guía de rastreo al portapapeles.
+* **Autocompletado en Checkout:**
+  * Al ingresar a [`CartPage.tsx`](../disc-market-frontend/src/features/cart/CartPage.tsx), el sistema precarga automáticamente la dirección de entrega guardada en `user_preferences`.
+
+---
+
 ## 🗄️ 3. Modelo de Datos (PostgreSQL / TypeORM)
 
 ```mermaid
@@ -137,6 +157,7 @@ erDiagram
     USERS ||--o{ SHOPPING_CARTS : tiene
     USERS ||--o{ ORDERS : realiza
     USERS ||--o{ CUSTOM_PRODUCTS : diseña
+    USERS ||--|| USER_PREFERENCES : configura
     
     CUSTOM_PRODUCTS ||--o{ CUSTOM_TRACKS : incluye
     
@@ -158,6 +179,23 @@ erDiagram
         string name
         string role
         datetime created_at
+    }
+
+    USER_PREFERENCES {
+        int preference_id PK
+        int user_id FK
+        string phone
+        string preferred_format
+        string theme
+        boolean notify_order_status
+        boolean notify_newsletter
+        string default_address_line1
+        string default_address_line2
+        string default_city
+        string default_state
+        string default_postal_code
+        string default_country
+        string avatar_url
     }
 
     PRODUCTS {
@@ -235,29 +273,59 @@ erDiagram
 
 ---
 
-## 🚀 5. Funcionalidades Pendientes y Hoja de Ruta (Roadmap)
+## 🧪 5. Datos de Prueba y Cuentas Semilla (Seeding)
+
+Para facilitar pruebas manuales y evaluación de flujos de compra, el proyecto incluye un script de inicialización (`src/seed/seed.ts`), ejecutable mediante:
+
+```bash
+npm run seed
+```
+
+### 5.1. Cuentas de Usuario de Prueba
+| Rol | Correo Electrónico | Contraseña | Configuración y Datos Iniciales |
+| :--- | :--- | :--- | :--- |
+| **Cliente Demo** | `demo@discmarket.com` | `Demo123!` | • Nombre: *Rafael Demo*<br>• Avatar: `🎧`<br>• Teléfono: `+52 55 1234 5678`<br>• Dirección de entrega guardada en Benito Juárez, CDMX (autocompleta checkout)<br>• Formato favorito: `VINYL`<br>• 2 órdenes históricas asociadas con guías `TRK-...` |
+| **Administrador** | `admin@discmarket.com` | `Admin123!` | • Nombre: *Administrador Disc Market*<br>• Avatar: `📻`<br>• Rol: `admin`<br>• Permisos elevados de catálogo |
+
+### 5.2. Historial de Órdenes del Cliente Demo
+1. **Pedido #1 (Entregado):**
+   * Artículos: *Random Access Memories* (Vinilo, $899.00) + *Thriller* (Vinilo, $699.00).
+   * Total: $1,598.00 MXN.
+   * Envío: *Envío Express Disc Market*, Guía oficial: `TRK-892145-4120`, Estado: `delivered`.
+2. **Pedido #2 (En Preparación):**
+   * Artículos: *Abbey Road* (Vinilo, $799.00).
+   * Total: $799.00 MXN.
+   * Envío: *Envío Estándar*, Guía oficial: `TRK-904321-7845`, Estado: `in_preparation`.
+
+### 5.3. Catálogo de Discos de Muestra
+8 títulos icónicos del catálogo (*Thriller*, *30*, *Back in Black*, *Abbey Road*, *The Dark Side of the Moon*, *Un Verano Sin Ti*, *Random Access Memories*, *Sour*) en formatos Vinilo y CD con stock en inventario y carátulas de alta definición.
+
+---
+
+## 🚀 6. Funcionalidades Pendientes y Hoja de Ruta (Roadmap)
 
 Para una especificación exhaustiva que incluye modelos de datos SQL, diagramas de secuencia de autorización, arquitectura de verificación acústica de copyright y planes de mitigación de bugs, consulte el documento maestro:
 👉 [**PENDING_FEATURES.md**](./PENDING_FEATURES.md)
 
-### Resumen de Módulos Pendientes:
-1. **🛡️ Usuario Administrador y Roles (RBAC):**
+### Resumen de Módulos:
+1. **🛡️ Usuario Administrador y Roles (RBAC):** *(Pendiente)*
    * Middleware de autenticación y autorización JWT (`authMiddleware`, `requireRole(['admin'])`).
    * Endpoints de catálogo para mutación (`PUT /api/products/:id`, `PATCH /api/products/:id/quick-edit`, `DELETE /api/products/:id`).
    * Panel de administración en Frontend (`/admin/productos`) para editar precios, descripciones, stock y altas de catálogo.
-2. **⚙️ Configuraciones de Usuario y Preferencias:**
-   * Entidad y tabla `user_preferences` (dirección predeterminada de envío, teléfono, preferencia de formato musical y notificaciones).
-   * Endpoints `GET/PUT /api/users/profile`, `PUT /api/users/preferences`, `PUT /api/users/password`.
-   * Vista de perfil de usuario (`/perfil`) con pestañas de información, seguridad y direcciones guardadas.
-3. **🎵 Subida de Audios y Validación de Copyright:**
+2. **⚙️ Configuraciones de Usuario y Preferencias:** ✅ *(Completado / Implementado)*
+   * Entidad y tabla `user_preferences` (dirección predeterminada de envío, teléfono, preferencia de formato musical, tema y notificaciones).
+   * Endpoints `GET/PUT /api/users/profile`, `PUT /api/users/preferences`, `PUT /api/users/password`, `GET /api/users/orders`.
+   * Vista de perfil de usuario (`/perfil`) con pestañas de datos personales con avatar selector, dirección de entrega con previsualización de etiqueta, preferencias de formato, seguridad con medidor de fortaleza y pedidos con rastreo.
+   * Autocompletado de dirección guardada en el flujo de checkout del carrito (`CartPage.tsx`).
+3. **🎵 Subida de Audios y Validación de Copyright:** *(Pendiente)*
    * Creador de discos personalizados (`/crear`) con uploader real de archivos (`.mp3`, `.wav`, `.flac`) y reproductor de preescucha.
    * Validación de límites de tiempo según formato (44 min vinilo, 80 min CD).
    * Sistema de detección de copyright en 3 capas: huella acústica automatizada (AcoustID / Chromaprint o AudD API), declaración jurada legal firmada digitalmente y auditoría de máster.
-4. **📦 Gestión Integral de Inventarios:**
+4. **📦 Gestión Integral de Inventarios:** *(Pendiente)*
    * Control de stock mínimo (`min_threshold`), alertas de rotura de inventario y registro histórico de movimientos (Kardex: compras, ventas, ajustes, mermas).
    * Prevención de sobreventa (concurrencia) mediante reserva temporal de stock con bloqueo a nivel de fila (`SELECT ... FOR UPDATE`) durante el checkout.
    * Vista de monitoreo de existencias para administradores (`/admin/inventario`).
-5. **🐛 Corrección de Errores y Estabilización:**
+5. **🐛 Corrección de Errores y Estabilización:** *(Pendiente)*
    * Protección de endpoints actualmente desprotegidos.
    * Sustitución de precios hardcodeados en personalización por consulta dinámica a base de datos.
    * Limpieza de archivos huérfanos en `uploads/` cuando falle la transacción en PostgreSQL.

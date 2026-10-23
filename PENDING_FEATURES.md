@@ -78,13 +78,26 @@ sequenceDiagram
 
 ---
 
-## ⚙️ Módulo 2: Configuraciones de Usuario y Preferencias
+## ⚙️ Módulo 2: Configuraciones de Usuario y Preferencias ✅ (Completado / Implementado)
+
+> **Estado:** ✅ **COMPLETADO (Octubre 2026)**
+>
+> **Artefactos implementados:**
+> * **Backend:**
+>   * Entidad TypeORM: [`UserPreference.ts`](./src/entities/UserPreference.ts) (relación 1:1 con `User`).
+>   * Controlador: [`user.controller.ts`](./src/controllers/user.controller.ts) con métodos `getProfile`, `updateProfile`, `updatePassword`, `updatePreferences` y `getUserOrders`.
+>   * Rutas: [`user.routes.ts`](./src/routes/user.routes.ts) protegidas con `authenticateToken` bajo `/api/users`.
+> * **Frontend:**
+>   * Servicios API: [`userService.ts`](../disc-market-frontend/src/shared/api/services/userService.ts) y contratos en [`types.ts`](../disc-market-frontend/src/shared/api/types.ts).
+>   * Vista Principal: [`ProfilePage.tsx`](../disc-market-frontend/src/features/profile/ProfilePage.tsx) con soporte para 5 pestañas de configuración.
+>   * Pestañas Modulares: [`PersonalInfoTab.tsx`](../disc-market-frontend/src/features/profile/components/PersonalInfoTab.tsx), [`ShippingAddressTab.tsx`](../disc-market-frontend/src/features/profile/components/ShippingAddressTab.tsx), [`PreferencesTab.tsx`](../disc-market-frontend/src/features/profile/components/PreferencesTab.tsx), [`SecurityTab.tsx`](../disc-market-frontend/src/features/profile/components/SecurityTab.tsx), y [`OrderHistoryTab.tsx`](../disc-market-frontend/src/features/profile/components/OrderHistoryTab.tsx).
+>   * Integración en Checkout: [`CartPage.tsx`](../disc-market-frontend/src/features/cart/CartPage.tsx) con autocompletado de la dirección por defecto guardada.
 
 ### 2.1. Contexto y Necesidad
-La experiencia de usuario actual no permite actualizar datos personales, gestionar direcciones de entrega guardadas, modificar la contraseña ni configurar preferencias de la plataforma.
+La experiencia de usuario previa no permitía actualizar datos personales, gestionar direcciones de entrega guardadas, modificar la contraseña ni configurar preferencias de la plataforma.
 
-### 2.2. Modelo de Datos Propuesto
-Se extenderá la persistencia con una tabla relacional `user_preferences` o columnas directas:
+### 2.2. Modelo de Datos Implementado
+Se persistió mediante la tabla relacional `user_preferences` conectada en relación 1:1 con `users`:
 
 ```sql
 CREATE TABLE user_preferences (
@@ -101,22 +114,27 @@ CREATE TABLE user_preferences (
     default_state VARCHAR(100),
     default_postal_code VARCHAR(20),
     default_country VARCHAR(100) DEFAULT 'México',
+    avatar_url VARCHAR(500),
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
-### 2.3. Endpoints a Implementar
-* `GET /api/users/profile`: Devuelve el perfil del usuario autenticado junto con sus preferencias y estadísticas de compras.
-* `PUT /api/users/profile`: Actualización de nombre y datos de contacto.
-* `PUT /api/users/password`: Cambio seguro de contraseña (exige `current_password`, valida con `bcrypt.compare`, y guarda el nuevo hash).
-* `PUT /api/users/preferences`: Actualización de dirección de envío por defecto y preferencias de notificación/formato.
+### 2.3. Endpoints Implementados
+* [x] `GET /api/users/profile`: Devuelve el perfil del usuario autenticado, sus preferencias y estadísticas de compras (total gastado, conteo de pedidos y última orden).
+* [x] `PUT /api/users/profile`: Actualización de nombre, teléfono y avatar de perfil.
+* [x] `PUT /api/users/password`: Cambio seguro de contraseña (valida `current_password` con `bcrypt.compare`, longitud mínima y cifra nuevo hash).
+* [x] `PUT /api/users/preferences`: Actualización de dirección de entrega por defecto, tema, formato musical y suscripción a notificaciones.
+* [x] `GET /api/users/orders`: Historial completo de órdenes con número de rastreo (`tracking_number`), desglose de ítems estándar y personalizados, y estados de entrega.
 
-### 2.4. Vistas y Componentes Frontend
-* **Ruta `/perfil` (Mi Cuenta):**
-  * **Pestaña 1 - Datos Personales:** Nombre, correo (solo lectura o con re-verificación), teléfono y avatar opcional.
-  * **Pestaña 2 - Dirección de Entrega:** Formulario para autocompletar envíos futuros durante el checkout de Stripe.
-  * **Pestaña 3 - Seguridad:** Cambio de contraseña con validación de fortaleza mínima.
-  * **Pestaña 4 - Historial de Pedidos:** Listado de órdenes pasadas con números de rastreo (`tracking_number`), recibo de Stripe y desglose de productos.
+### 2.4. Vistas y Componentes Frontend Implementados
+* [x] **Ruta `/perfil` (Mi Cuenta):**
+  * [x] **Cabecera y Métricas:** Tarjeta con avatar dinámico, rol, fecha de alta y contadores de pedidos e inversión total.
+  * [x] **Pestaña 1 - Datos Personales:** Nombre, correo verificado (solo lectura), teléfono y selector de avatares temáticos.
+  * [x] **Pestaña 2 - Dirección de Entrega:** Formulario estructurado y vista previa interactiva estilo etiqueta física de paquetería.
+  * [x] **Pestaña 3 - Preferencias & Formato:** Selección de formato predilecto (Vinilo/CD/Ambos), tema visual y toggles de alertas.
+  * [x] **Pestaña 4 - Seguridad:** Cambio de contraseña con medidor interactivo de fortaleza en tiempo real.
+  * [x] **Pestaña 5 - Historial de Pedidos:** Listado de órdenes con badges de estatus, desglose de productos y botón para copiar la guía de rastreo.
+  * [x] **Autocompletado en Checkout:** Precarga automática de la dirección guardada en `CartPage.tsx`.
 
 ---
 
@@ -262,18 +280,18 @@ gantt
     Panel de Administración en Frontend (/admin) : 2026-10-30, 5d
     CRUD de Productos y Control de Stock : 2026-11-04, 4d
     section Fase 3: Perfil y Preferencias
-    Modelo user_preferences y Endpoints : 2026-11-08, 3d
-    Vista de Perfil y Direcciones de Envío : 2026-11-11, 4d
+    Modelo user_preferences y Endpoints :done, 2026-10-20, 2d
+    Vista de Perfil y Direcciones de Envío :done, 2026-10-20, 2d
     section Fase 4: Pipeline de Audio y Copyright
     Subida masiva de audio en Frontend : 2026-11-15, 4d
     Validación de Copyright e Integración de Fingerprint : 2026-11-19, 6d
     Firma digital de declaración jurada y auditoría : 2026-11-25, 3d
 ```
 
-| Prioridad | Módulo / Funcionalidad | Impacto en Negocio | Esfuerzo Técnico |
-| :---: | :--- | :---: | :---: |
-| 🔴 **P0 (Crítico)** | Corrección de bugs de seguridad, middlewares JWT y control RBAC | Alto (Seguridad / Integridad) | Medio |
-| 🔴 **P0 (Crítico)** | Gestión de Inventarios (Control de existencias y prevención de sobreventa) | Alto (Operación comercial) | Medio-Alto |
-| 🟡 **P1 (Alto)** | Panel de Usuario Administrador (CRUD de productos y precios) | Alto (Autonomía de negocio) | Medio |
-| 🟡 **P1 (Alto)** | Subida de pistas de audio y validación de copyright | Alto (Funcionalidad core personalizada) | Alto |
-| 🟢 **P2 (Medio)** | Configuraciones de usuario, preferencias y direcciones guardadas | Medio (Experiencia de usuario / Fidelización) | Bajo-Medio |
+| Prioridad | Módulo / Funcionalidad | Impacto en Negocio | Esfuerzo Técnico | Estado |
+| :---: | :--- | :---: | :---: | :---: |
+| 🔴 **P0 (Crítico)** | Corrección de bugs de seguridad, middlewares JWT y control RBAC | Alto (Seguridad / Integridad) | Medio | ⏳ Pendiente |
+| 🔴 **P0 (Crítico)** | Gestión de Inventarios (Control de existencias y prevención de sobreventa) | Alto (Operación comercial) | Medio-Alto | ⏳ Pendiente |
+| 🟡 **P1 (Alto)** | Panel de Usuario Administrador (CRUD de productos y precios) | Alto (Autonomía de negocio) | Medio | ⏳ Pendiente |
+| 🟡 **P1 (Alto)** | Subida de pistas de audio y validación de copyright | Alto (Funcionalidad core personalizada) | Alto | ⏳ Pendiente |
+| 🟢 **P2 (Medio)** | Configuraciones de usuario, preferencias y direcciones guardadas | Medio (Experiencia de usuario / Fidelización) | Bajo-Medio | ✅ **Completado** |
