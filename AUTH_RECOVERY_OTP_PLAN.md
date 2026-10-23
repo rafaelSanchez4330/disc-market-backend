@@ -260,10 +260,11 @@ gantt
     Pruebas E2E de entrega de correo y expiración : 2026-10-29, 1d
 ```
 
-| Fase | Componente | Descripción de Tareas |
-| :---: | :--- | :--- |
-| **Fase 1** | **Resend Mail Service** | Instalar `resend` en el backend. Crear helper modular `src/services/mail.service.ts` con funciones `sendPasswordResetEmail(to, token)` y `sendOtpEmail(to, code)`. |
-| **Fase 2** | **Persistencia TypeORM** | Crear entidades `PasswordReset.ts` y `UserOtp.ts`, registrar en `data-source.ts` y verificar sincronización de tablas en PostgreSQL. |
-| **Fase 3** | **Controladores y Seguridad** | Crear controlador `authRecovery.controller.ts` con hashing SHA-256 de tokens y protección con `express-rate-limit`. |
-| **Fase 4** | **Vistas y UX en Frontend** | Crear páginas `/olvide-contrasena`, `/recuperar-contrasena` y selector OTP en `/iniciar-sesion`. Crear servicio `authRecoveryService.ts`. |
-| **Fase 5** | **Validación y Pruebas** | Probar solicitud de códigos, reseteo de claves reales, límites de tiempo de expiración y bloqueo tras 3 intentos fallidos. |
+| Fase | Componente | Descripción de Tareas | Estado |
+| :---: | :--- | :--- | :---: |
+| **Fase 1** | **Resend Mail Service** | Instalar `resend` en el backend. Crear helper modular `src/services/mail.service.ts` con funciones `sendPasswordResetEmail(to, token)` y `sendOtpEmail(to, code)`. Soporte de consola fallback para desarrollo local sin API Key. | ✅ **Completado** |
+| **Fase 2** | **Persistencia TypeORM** | Crear entidades `PasswordReset.ts` y `UserOtp.ts`, registrar en `data-source.ts` y verificar sincronización de tablas en PostgreSQL. | ✅ **Completado** |
+| **Fase 3** | **Controladores y Seguridad** | Crear controlador `authRecovery.controller.ts` con hashing SHA-256 de tokens y protección con `express-rate-limit`. | ✅ **Completado** |
+| **Fase 4** | **Vistas y UX en Frontend** | Crear páginas `/olvide-contrasena`, `/recuperar-contrasena` y selector OTP en `/iniciar-sesion`. Crear servicio `authRecoveryService.ts` y componente `OtpInput`. | ✅ **Completado** |
+| **Fase 5** | **Validación y Pruebas** | Probar solicitud de códigos, reseteo de claves reales, límites de tiempo de expiración y bloqueo tras 3 intentos fallidos. Verificación con `npx tsc --noEmit` en ambos proyectos (0 errores). | ✅ **Completado** |
+

@@ -11,3 +11,5 @@ export * from './OrderItem';
 export * from './Payment';
 export * from './Shipping';
 export * from './UserPreference';
+export * from './PasswordReset';
+export * from './UserOtp';

@@ -15,6 +15,8 @@ import {
   Payment,
   Shipping,
   UserPreference,
+  PasswordReset,
+  UserOtp,
 } from '../entities';
 
 dotenv.config();
@@ -42,6 +44,8 @@ export const AppDataSource = new DataSource({
     Payment,
     Shipping,
     UserPreference,
+    PasswordReset,
+    UserOtp,
   ],
   migrations: [],
   subscribers: [],
