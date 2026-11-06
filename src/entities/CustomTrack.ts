@@ -30,4 +30,19 @@ export class CustomTrack {
 
   @Column({ type: 'int', default: 0 })
   duration: number; // Duración en segundos
+
+  @Column({ type: 'varchar', length: 20, default: 'PENDING' })
+  copyright_status: string; // 'VERIFIED' | 'PENDING' | 'FLAGGED'
+
+  @Column({ type: 'varchar', length: 200, nullable: true })
+  copyright_match_title: string | null;
+
+  @Column({ type: 'varchar', length: 200, nullable: true })
+  copyright_match_artist: string | null;
+
+  @Column({ type: 'bigint', default: 0 })
+  file_size_bytes: number;
+
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  audio_fingerprint: string | null;
 }

@@ -4,6 +4,7 @@ import {
   addTracksToCustomProduct,
   getCustomProductById,
   getCustomProductPricing,
+  scanAudioTrack,
 } from '../controllers/customProduct.controller';
 import {
   uploadCover,
@@ -35,6 +36,14 @@ router.post(
 
 // Consultar tarifas base vigentes de personalización (antes de la ruta dinámica /:id)
 router.get('/pricing', getCustomProductPricing);
+
+// Pre-escanear pista de audio (análisis en vivo de duración, peso y copyright - público para diseño de disco)
+router.post(
+  '/scan-track',
+  uploadTracks.single('audio'),
+  validateAudioMagicBytes,
+  scanAudioTrack
+);
 
 // Consultar detalle de disco personalizado con sus tracks
 router.get('/:id', getCustomProductById);
