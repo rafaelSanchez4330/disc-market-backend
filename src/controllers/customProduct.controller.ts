@@ -3,6 +3,7 @@ import { AppDataSource } from '../config/data-source';
 import { CustomProduct } from '../entities/CustomProduct';
 import { CustomTrack } from '../entities/CustomTrack';
 import { User } from '../entities/User';
+import { safelyDeleteFile, safelyDeleteFiles } from '../utils/fileCleanup';
 
 const customProductRepo = AppDataSource.getRepository(CustomProduct);
 const customTrackRepo = AppDataSource.getRepository(CustomTrack);
@@ -11,18 +12,11 @@ const userRepo = AppDataSource.getRepository(User);
 export const createCustomProduct = async (req: Request, res: Response): Promise<void> => {
   try {
     const authReq = req as any;
-    let userId = authReq.user?.user_id || (req.body.user_id ? parseInt(req.body.user_id, 10) : null);
-
-    // Si no se proporcionó user_id, intentar asignar el primer usuario registrado en la base de datos
-    if (!userId) {
-      const defaultUser = await userRepo.findOne({ order: { user_id: 'ASC' } });
-      if (defaultUser) {
-        userId = defaultUser.user_id;
-      }
-    }
+    const userId = authReq.user?.user_id;
 
     if (!userId) {
-      res.status(400).json({ message: 'Se requiere un usuario para crear un producto personalizado' });
+      await safelyDeleteFile(req.file?.path);
+      res.status(401).json({ message: 'Se requiere iniciar sesión para crear un producto personalizado' });
       return;
     }
 
@@ -86,22 +80,41 @@ export const createCustomProduct = async (req: Request, res: Response): Promise<
 
     res.status(201).json(result);
   } catch (error: any) {
+    // Rollback de archivo si la inserción en BD falla
+    await safelyDeleteFile(req.file?.path);
     res.status(500).json({ message: 'Error al crear producto personalizado', error: error.message });
   }
 };
 
 export const addTracksToCustomProduct = async (req: Request, res: Response): Promise<void> => {
+  const files = (req.files as Express.Multer.File[]) || [];
   try {
+    const authReq = req as any;
+    const userId = authReq.user?.user_id;
+
+    if (!userId) {
+      await safelyDeleteFiles(files);
+      res.status(401).json({ message: 'Se requiere iniciar sesión para agregar pistas a un disco personalizado' });
+      return;
+    }
+
     const { id } = req.params;
     const custom_product_id = parseInt(id, 10);
-    const files = (req.files as Express.Multer.File[]) || [];
 
     const customProduct = await customProductRepo.findOne({
       where: { custom_product_id },
     });
 
     if (!customProduct) {
+      await safelyDeleteFiles(files);
       res.status(404).json({ message: 'Producto personalizado no encontrado' });
+      return;
+    }
+
+    // Comprobar pertenencia de la creación personalizada
+    if (customProduct.user_id !== userId && authReq.user?.role !== 'admin') {
+      await safelyDeleteFiles(files);
+      res.status(403).json({ message: 'No estás autorizado para modificar este producto personalizado' });
       return;
     }
 
@@ -122,6 +135,7 @@ export const addTracksToCustomProduct = async (req: Request, res: Response): Pro
     }
 
     if (files.length === 0 && (!trackMetadata || trackMetadata.length === 0)) {
+      await safelyDeleteFiles(files);
       res.status(400).json({ message: 'No se enviaron pistas de audio ni metadatos' });
       return;
     }
@@ -166,6 +180,8 @@ export const addTracksToCustomProduct = async (req: Request, res: Response): Pro
       tracks: savedTracks,
     });
   } catch (error: any) {
+    // Rollback de archivos de audio si la inserción en BD falla
+    await safelyDeleteFiles(files);
     res.status(500).json({ message: 'Error al agregar pistas de audio', error: error.message });
   }
 };
