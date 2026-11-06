@@ -2,11 +2,13 @@ import { Request, Response } from 'express';
 import { AppDataSource } from '../config/data-source';
 import { CustomProduct } from '../entities/CustomProduct';
 import { CustomTrack } from '../entities/CustomTrack';
+import { Product } from '../entities/Product';
 import { User } from '../entities/User';
 import { safelyDeleteFile, safelyDeleteFiles } from '../utils/fileCleanup';
 
 const customProductRepo = AppDataSource.getRepository(CustomProduct);
 const customTrackRepo = AppDataSource.getRepository(CustomTrack);
+const productRepo = AppDataSource.getRepository(Product);
 const userRepo = AppDataSource.getRepository(User);
 
 export const createCustomProduct = async (req: Request, res: Response): Promise<void> => {
@@ -24,11 +26,22 @@ export const createCustomProduct = async (req: Request, res: Response): Promise<
     const coverFile = req.file;
     const cover_image = coverFile ? `/uploads/covers/${coverFile.filename}` : null;
 
-    const normalizedPrice = price
-      ? parseFloat(price)
-      : format === 'VINYL' || format === 'Vinyl'
+    // Consultar precio base oficial desde PostgreSQL para evitar desincronización y manipulación
+    const isVinyl = (format || '').toUpperCase() === 'VINYL';
+    const templateProduct = await productRepo.findOne({
+      where: isVinyl
+        ? [{ name: 'Custom Vinyl' }, { name: 'Vinilo Personalizado' }]
+        : [{ name: 'Custom CD' }, { name: 'CD Personalizado' }],
+    });
+
+    const officialBasePrice = templateProduct
+      ? Number(templateProduct.price)
+      : isVinyl
         ? 799.0
         : 99.0;
+
+    // Si el frontend envía un precio que coincide o se confía en la tarifa oficial calculada
+    const normalizedPrice = officialBasePrice;
 
     const newCustomProduct = customProductRepo.create({
       user_id: userId,
@@ -210,5 +223,43 @@ export const getCustomProductById = async (req: Request, res: Response): Promise
     });
   } catch (error: any) {
     res.status(500).json({ message: 'Error al obtener producto personalizado', error: error.message });
+  }
+};
+
+/**
+ * GET /api/custom-products/pricing
+ * Retorna las tarifas base vigentes para discos personalizados directamente desde PostgreSQL.
+ */
+export const getCustomProductPricing = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const cdProduct = await productRepo.findOne({
+      where: [{ name: 'Custom CD' }, { name: 'CD Personalizado' }],
+    });
+    const vinylProduct = await productRepo.findOne({
+      where: [{ name: 'Custom Vinyl' }, { name: 'Vinilo Personalizado' }],
+    });
+
+    const cdPrice = cdProduct ? Number(cdProduct.price) : 99.0;
+    const vinylPrice = vinylProduct ? Number(vinylProduct.price) : 799.0;
+
+    res.json({
+      CD: {
+        format: 'CD',
+        name: cdProduct?.name || 'Custom CD',
+        base_price: cdPrice,
+        description: cdProduct?.description || 'CD personalizado con pistas y portada estándar.',
+      },
+      VINYL: {
+        format: 'VINYL',
+        name: vinylProduct?.name || 'Custom Vinyl',
+        base_price: vinylPrice,
+        description: vinylProduct?.description || 'Vinilo personalizado cortado bajo pedido.',
+      },
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      message: 'Error al consultar tarifas de personalización',
+      error: error.message,
+    });
   }
 };

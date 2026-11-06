@@ -3,6 +3,7 @@ import {
   createCustomProduct,
   addTracksToCustomProduct,
   getCustomProductById,
+  getCustomProductPricing,
 } from '../controllers/customProduct.controller';
 import {
   uploadCover,
@@ -31,6 +32,9 @@ router.post(
   validateAudioMagicBytes,
   addTracksToCustomProduct
 );
+
+// Consultar tarifas base vigentes de personalización (antes de la ruta dinámica /:id)
+router.get('/pricing', getCustomProductPricing);
 
 // Consultar detalle de disco personalizado con sus tracks
 router.get('/:id', getCustomProductById);
