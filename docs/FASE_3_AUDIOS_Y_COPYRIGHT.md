@@ -182,3 +182,20 @@ El servicio `CopyrightService` implementa:
 5. **Rollback de Archivos Huérfanos:**
    - Verificación de que en caso de error o rechazo por copyright, los archivos en `uploads/tracks/` son borrados inmediatamente sin dejar fugas de almacenamiento en el servidor.
 
+---
+
+## 5. 🛠️ Análisis Post-Lanzamiento: Corrección de Falso Positivo / Falsa Verificación
+
+### 5.1. Diagnóstico del Incidente
+Al probar la subida de una pista protegida comercialmente (ej: *"Ramona Flowers"*), la canción pasó erróneamente la verificación y se agregó al carrito. La investigación profunda reveló dos fallas críticas concatenadas:
+1. **Bloqueo 401 en `/api/custom-products/scan-track`:** La ruta de escaneo preliminar exigía `authenticateToken`. Si el usuario no había iniciado sesión al personalizar su disco, la petición arrojaba `401 Unauthorized`.
+2. **Fallback Permisivo en `CreatePage.tsx`:** El bloque `catch (err)` en el frontend, al recibir el error 401, establecía por defecto `copyrightStatus: "VERIFIED"`, engañando a la interfaz y otorgando un falso aprobado.
+3. **Ausencia de Extracción de Metadatos ID3 y Catálogo Reducido:** El servicio previo únicamente comparaba el nombre del archivo contra un listado estático de 18 canciones sin extraer cabeceras binarias (ID3v2, ID3v1, RIFF/WAV INFO, Vorbis comments) ni evaluar sellos discográficos comerciales o avisos de copyright explícitos.
+
+### 5.2. Solución Implementada
+1. **Ruta Pública de Escaneo:** Se removió `authenticateToken` de `POST /api/custom-products/scan-track` para permitir que usuarios anónimos/invitados que diseñan su disco puedan recibir el análisis sin interrupciones.
+2. **Cero Tolerancia a Fallos en Frontend:** Ante cualquier falla en el escaneo, `CreatePage.tsx` ahora marca el estatus estrictamente como `FLAGGED` con mensaje de error, impidiendo que avance al resumen o al carrito.
+3. **Motor Profundo de Extracción de Metadatos:** Se incorporó en `CopyrightService` un parser binario nativo que extrae etiquetas `TIT2`, `TPE1`, `TALB`, `TCOP`, `TPUB`, `ISRC` y realiza un deep scan de strings en los primeros 256 KB.
+4. **Catálogo Comercial Extendido:** Se incorporaron diccionarios exhaustivos de sellos comerciales (`Sony`, `Universal`, `Warner`, `Distiller Records`, `EMI`, etc.), artistas comerciales (incluyendo *"The Ramona Flowers"*), avisos explícitos de reserva de derechos (`©`, `(C)`, `(P)`, `All rights reserved`) y códigos ISRC.
+
+
