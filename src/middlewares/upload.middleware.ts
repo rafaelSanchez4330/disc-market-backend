@@ -214,7 +214,12 @@ export const validateAudioMagicBytes = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  const files = (req.files as Express.Multer.File[]) || [];
+  const files: Express.Multer.File[] = Array.isArray(req.files)
+    ? req.files
+    : req.file
+    ? [req.file]
+    : [];
+
   if (files.length === 0) {
     return next();
   }

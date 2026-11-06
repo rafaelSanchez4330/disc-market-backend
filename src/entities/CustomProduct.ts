@@ -42,6 +42,21 @@ export class CustomProduct {
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   price: number;
 
+  @Column({ type: 'int', default: 0 })
+  total_duration: number; // Duración total acumulada en segundos
+
+  @Column({ type: 'boolean', default: false })
+  copyright_disclaimer_accepted: boolean;
+
+  @Column({ type: 'timestamp', nullable: true })
+  copyright_disclaimer_timestamp: Date | null;
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  copyright_disclaimer_ip: string | null;
+
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  copyright_disclaimer_hash: string | null;
+
   @CreateDateColumn({ name: 'created_at' })
   created_at: Date;
 
