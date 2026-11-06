@@ -32,6 +32,7 @@ chown -R discmarket:discmarket "$release"
 (cd "$release/frontend" && runuser -u discmarket -- npm ci --no-audit --no-fund && runuser -u discmarket -- npm run build)
 chmod -R a+rX "$release/frontend/dist"
 runuser -u postgres -- psql -v ON_ERROR_STOP=1 -d disc_market_db < "$release/backend/scripts/deployment/stripe-schema.sql"
+runuser -u postgres -- psql -v ON_ERROR_STOP=1 -d disc_market_db < "$release/backend/scripts/deployment/stock-reservations.sql"
 # Retain previous directories/links for rollback; never replace uploads or database.
 previous_backend=/opt/disc-market/backend-before-$release_id
 previous_frontend=/var/www/disc-market-before-$release_id

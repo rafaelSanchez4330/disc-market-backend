@@ -2,6 +2,12 @@
 
 ## Entorno y despliegue
 
+- [Arrancar y validar el panel de administración](docs/ADMIN.md)
+
+- [Control de stock, reservas y pagos](docs/STOCK.md)
+
+- [Architecture, service interactions, and database relationships](docs/ARCHITECTURE.md)
+
 - [Preguntas y respuestas para estudiar la arquitectura y el flujo](docs/GUIA-ESTUDIO.md)
 
 - [Configuración local y pgAdmin](docs/LOCAL-SETUP.md)

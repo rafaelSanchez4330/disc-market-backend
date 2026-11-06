@@ -5,6 +5,9 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
+    "test:admin": "npm run build && node --test test/admin.integration.cjs",
+    "test:stock": "npm run build && node --test test/stock.integration.cjs",
+    "admin:grant": "node scripts/grant-admin.cjs",
     "start": "node dist/index.js",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "seed": "ts-node-dev --transpile-only src/seed/seed.ts"

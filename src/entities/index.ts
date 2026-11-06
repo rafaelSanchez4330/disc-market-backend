@@ -13,3 +13,4 @@ export * from './Shipping';
 export * from './UserPreference';
 export * from './PasswordReset';
 export * from './UserOtp';
+export * from './CheckoutReservation';
