@@ -9,14 +9,16 @@
 - Sitio de prueba: https://vinylhrz.tech
 
 
+
 API REST para la plataforma de comercio electrónico de CDs y Vinilos convencionales y personalizados, desarrollada con **Node.js**, **Express**, **TypeScript**, **TypeORM** y **PostgreSQL**, con almacenamiento local de archivos mediante **Multer**.
 
 ---
 
-## 🗄️ Modelo de Datos (12 Entidades)
+## 🗄️ Modelo de Datos (13 Entidades)
 
 Basado en la especificación técnica de la propuesta:
 - `users`: Usuarios y administradores.
+- `user_preferences`: Configuraciones de usuario, direcciones de entrega, avatar y preferencias de formato.
 - `categories`: Clasificación de productos.
 - `products`: Catálogo de CDs y vinilos regulares.
 - `inventory`: Stock disponible y reservado.
@@ -37,11 +39,11 @@ Basado en la especificación técnica de la propuesta:
 disc-market-backend/
 ├── src/
 │   ├── config/             # Configuración de TypeORM DataSource y PostgreSQL
-│   ├── controllers/        # Controladores (Auth, Products, CustomProducts, Cart, Orders)
-│   ├── entities/           # 12 Entidades ORM con TypeORM
-│   ├── middlewares/        # Multer (almacenamiento de audios y portadas)
+│   ├── controllers/        # Controladores (Auth, Users, Products, CustomProducts, Cart, Orders, Payments)
+│   ├── entities/           # 13 Entidades ORM con TypeORM
+│   ├── middlewares/        # Auth JWT, Multer (almacenamiento de audios y portadas)
 │   ├── routes/             # Enrutamiento modular para Express
-│   ├── seed/               # Script para poblar datos iniciales
+│   ├── seed/               # Script para poblar datos iniciales y cuentas de prueba
 │   ├── app.ts              # Configuración de Express, CORS y estáticos
 │   └── index.ts            # Arranque del servidor y conexión a BD
 ├── uploads/                # Archivos locales subidos (portadas y tracks)
@@ -77,6 +79,13 @@ disc-market-backend/
    ```bash
    npm run seed
    ```
+
+   **Cuentas y datos de prueba precargados:**
+   | Rol | Correo Electrónico | Contraseña | Datos incluidos |
+   | :--- | :--- | :--- | :--- |
+   | **Cliente Demo** | `demo@discmarket.com` | `Demo123!` | Dirección guardada en CDMX, avatar `🎧`, preferencia Vinilos y 2 pedidos en historial con guías `TRK-...` |
+   | **Administrador** | `admin@discmarket.com` | `Admin123!` | Rol `admin` para administración del catálogo y acceso al panel |
+   | **Catálogo** | *8 Álbumes* | N/A | Vinilos y CDs de Michael Jackson, Daft Punk, Pink Floyd, Adele, etc. con stock e inventario |
 
 5. **Iniciar en modo desarrollo:**
    ```bash

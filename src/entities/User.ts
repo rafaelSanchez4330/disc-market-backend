@@ -4,10 +4,12 @@ import {
   Column,
   CreateDateColumn,
   OneToMany,
+  OneToOne,
 } from 'typeorm';
 import { ShoppingCart } from './ShoppingCart';
 import { CustomProduct } from './CustomProduct';
 import { Order } from './Order';
+import { UserPreference } from './UserPreference';
 
 @Entity('users')
 export class User {
@@ -37,4 +39,7 @@ export class User {
 
   @OneToMany(() => Order, (order) => order.user)
   orders: Order[];
+
+  @OneToOne(() => UserPreference, (pref) => pref.user)
+  preferences: UserPreference;
 }

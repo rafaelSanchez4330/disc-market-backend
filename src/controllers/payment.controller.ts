@@ -203,8 +203,15 @@ export const confirmPayment = async (req: Request, res: Response): Promise<void>
     const stripe = getStripe();
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
-    if (paymentIntent.metadata.userId !== String((req as any).user?.user_id)) {
-      res.status(403).json({ message: 'No tienes acceso a este pago' });
+    const authReq = req as any;
+    const userId = authReq.user?.user_id;
+    if (
+      !paymentIntent.metadata.userId ||
+      !userId ||
+      (parseInt(paymentIntent.metadata.userId, 10) !== userId &&
+      authReq.user?.role !== 'admin')
+    ) {
+      res.status(403).json({ message: 'No estás autorizado para confirmar este pago' });
       return;
     }
 

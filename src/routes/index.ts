@@ -6,10 +6,12 @@ import customProductRoutes from './customProduct.routes';
 import cartRoutes from './cart.routes';
 import orderRoutes from './order.routes';
 import paymentRoutes from './payment.routes';
+import userRoutes from './user.routes';
 
 const router = Router();
 
 router.use('/auth', authRoutes);
+router.use('/users', userRoutes);
 router.use('/products', productRoutes);
 router.use('/categories', categoryRoutes);
 router.use('/custom-products', customProductRoutes);

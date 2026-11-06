@@ -15,15 +15,16 @@ const userRepo = AppDataSource.getRepository(User);
 export const getUserCart = async (req: Request, res: Response): Promise<void> => {
   try {
     const authReq = req as any;
-    let userId = authReq.user?.user_id || (req.params.user_id ? parseInt(req.params.user_id, 10) : null);
+    const userId = authReq.user?.user_id;
+    const requestedUserId = req.params.user_id ? parseInt(req.params.user_id, 10) : null;
 
     if (!userId) {
-      const firstUser = await userRepo.findOne({ order: { user_id: 'ASC' } });
-      userId = firstUser ? firstUser.user_id : null;
+      res.status(401).json({ message: 'Se requiere autenticación para consultar el carrito' });
+      return;
     }
 
-    if (!userId) {
-      res.status(400).json({ message: 'Usuario no identificado para obtener el carrito' });
+    if (requestedUserId && requestedUserId !== userId && authReq.user?.role !== 'admin') {
+      res.status(403).json({ message: 'No tienes autorización para consultar el carrito de otro usuario' });
       return;
     }
 
@@ -70,15 +71,10 @@ export const getUserCart = async (req: Request, res: Response): Promise<void> =>
 export const addToCart = async (req: Request, res: Response): Promise<void> => {
   try {
     const authReq = req as any;
-    let userId = authReq.user?.user_id || (req.body.user_id ? parseInt(req.body.user_id, 10) : null);
+    const userId = authReq.user?.user_id;
 
     if (!userId) {
-      const firstUser = await userRepo.findOne({ order: { user_id: 'ASC' } });
-      userId = firstUser ? firstUser.user_id : null;
-    }
-
-    if (!userId) {
-      res.status(400).json({ message: 'Se requiere un usuario para agregar al carrito' });
+      res.status(401).json({ message: 'Se requiere iniciar sesión para agregar productos al carrito' });
       return;
     }
 
@@ -162,16 +158,30 @@ export const addToCart = async (req: Request, res: Response): Promise<void> => {
 
 export const updateCartItem = async (req: Request, res: Response): Promise<void> => {
   try {
+    const authReq = req as any;
+    const userId = authReq.user?.user_id;
+
+    if (!userId) {
+      res.status(401).json({ message: 'Se requiere autenticación' });
+      return;
+    }
+
     const { item_id } = req.params;
     const { quantity } = req.body;
     const qty = parseInt(quantity, 10);
 
     const item = await cartItemRepo.findOne({
       where: { cart_item_id: parseInt(item_id, 10) },
+      relations: ['cart'],
     });
 
     if (!item) {
       res.status(404).json({ message: 'Ítem no encontrado en el carrito' });
+      return;
+    }
+
+    if (item.cart && item.cart.user_id !== userId && authReq.user?.role !== 'admin') {
+      res.status(403).json({ message: 'No estás autorizado para modificar este ítem' });
       return;
     }
 
@@ -195,8 +205,31 @@ export const updateCartItem = async (req: Request, res: Response): Promise<void>
 
 export const removeFromCart = async (req: Request, res: Response): Promise<void> => {
   try {
+    const authReq = req as any;
+    const userId = authReq.user?.user_id;
+
+    if (!userId) {
+      res.status(401).json({ message: 'Se requiere autenticación' });
+      return;
+    }
+
     const { item_id } = req.params;
-    await cartItemRepo.delete({ cart_item_id: parseInt(item_id, 10) });
+    const item = await cartItemRepo.findOne({
+      where: { cart_item_id: parseInt(item_id, 10) },
+      relations: ['cart'],
+    });
+
+    if (!item) {
+      res.status(404).json({ message: 'Ítem no encontrado en el carrito' });
+      return;
+    }
+
+    if (item.cart && item.cart.user_id !== userId && authReq.user?.role !== 'admin') {
+      res.status(403).json({ message: 'No estás autorizado para eliminar este ítem' });
+      return;
+    }
+
+    await cartItemRepo.delete({ cart_item_id: item.cart_item_id });
     res.json({ message: 'Elemento eliminado del carrito' });
   } catch (error: any) {
     res.status(500).json({ message: 'Error al eliminar ítem del carrito', error: error.message });
@@ -206,10 +239,16 @@ export const removeFromCart = async (req: Request, res: Response): Promise<void>
 export const clearCart = async (req: Request, res: Response): Promise<void> => {
   try {
     const authReq = req as any;
-    let userId = authReq.user?.user_id || (req.params.user_id ? parseInt(req.params.user_id, 10) : null);
+    const userId = authReq.user?.user_id;
+    const requestedUserId = req.params.user_id ? parseInt(req.params.user_id, 10) : null;
 
     if (!userId) {
-      res.status(400).json({ message: 'Usuario no especificado' });
+      res.status(401).json({ message: 'Se requiere autenticación' });
+      return;
+    }
+
+    if (requestedUserId && requestedUserId !== userId && authReq.user?.role !== 'admin') {
+      res.status(403).json({ message: 'No estás autorizado para vaciar el carrito de otro usuario' });
       return;
     }
 
