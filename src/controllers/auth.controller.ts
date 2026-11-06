@@ -8,7 +8,7 @@ const userRepository = AppDataSource.getRepository(User);
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
       res.status(400).json({ message: 'Todos los campos son obligatorios' });
@@ -28,7 +28,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       name,
       email,
       password_hash,
-      role: role || 'customer',
+      role: 'customer',
     });
 
     await userRepository.save(newUser);

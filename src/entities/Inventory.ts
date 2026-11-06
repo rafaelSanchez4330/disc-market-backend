@@ -4,10 +4,12 @@ import {
   Column,
   OneToOne,
   JoinColumn,
+  Check,
 } from 'typeorm';
 import { Product } from './Product';
 
 @Entity('inventory')
+@Check('CHK_inventory_nonnegative', '"quantity_available" >= 0 AND "quantity_reserved" >= 0')
 export class Inventory {
   @PrimaryGeneratedColumn({ name: 'inventory_id' })
   inventory_id: number;

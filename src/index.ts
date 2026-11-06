@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import dotenv from 'dotenv';
 import app from './app';
 import { AppDataSource } from './config/data-source';
+import { reconcileExpiredCheckouts } from './services/checkout.service';
 
 dotenv.config();
 
@@ -31,6 +32,19 @@ const connectWithRetry = async (retries = MAX_DB_RETRIES, delayMs = INITIAL_RETR
 const startServer = async () => {
   try {
     await connectWithRetry();
+
+    if (process.env.STRIPE_SECRET_KEY) {
+      let reconciling = false;
+      const reconcile = async () => {
+        if (reconciling) return;
+        reconciling = true;
+        try { await reconcileExpiredCheckouts(); }
+        catch (error) { console.error('No se pudieron revisar las reservas pendientes:', (error as Error).message); }
+        finally { reconciling = false; }
+      };
+      void reconcile();
+      setInterval(() => { void reconcile(); }, 60000).unref();
+    }
 
     app.listen(PORT, () => {
       console.log(`🚀 Servidor ejecutándose en: http://localhost:${PORT}`);

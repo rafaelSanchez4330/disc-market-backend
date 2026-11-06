@@ -17,6 +17,7 @@ import {
   UserPreference,
   PasswordReset,
   UserOtp,
+  CheckoutReservation,
 } from '../entities';
 
 dotenv.config();
@@ -46,6 +47,7 @@ export const AppDataSource = new DataSource({
     UserPreference,
     PasswordReset,
     UserOtp,
+    CheckoutReservation,
   ],
   migrations: [],
   subscribers: [],
