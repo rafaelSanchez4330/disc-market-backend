@@ -127,12 +127,7 @@ async function processOrderFromPaymentIntent(paymentIntent: Stripe.PaymentIntent
 export const createPaymentIntent = async (req: Request, res: Response): Promise<void> => {
   try {
     const authReq = req as any;
-    let userId = authReq.user?.user_id || (req.body.user_id ? parseInt(req.body.user_id, 10) : null);
-
-    if (!userId) {
-      const firstUser = await userRepo.findOne({ order: { user_id: 'ASC' } });
-      userId = firstUser ? firstUser.user_id : null;
-    }
+    const userId = authReq.user?.user_id;
 
     if (!userId) {
       res.status(401).json({ message: 'Se requiere iniciar sesión para proceder al pago' });
@@ -209,6 +204,18 @@ export const confirmPayment = async (req: Request, res: Response): Promise<void>
 
     const stripe = getStripe();
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+    const authReq = req as any;
+    const userId = authReq.user?.user_id;
+    if (
+      paymentIntent.metadata.userId &&
+      userId &&
+      parseInt(paymentIntent.metadata.userId, 10) !== userId &&
+      authReq.user?.role !== 'admin'
+    ) {
+      res.status(403).json({ message: 'No estás autorizado para confirmar este pago' });
+      return;
+    }
 
     if (paymentIntent.status !== 'succeeded') {
       res.status(400).json({

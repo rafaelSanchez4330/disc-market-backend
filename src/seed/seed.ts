@@ -29,7 +29,7 @@ export const runSeed = async () => {
   // =========================================================================
   // 1. CATEGORÍAS INICIALES
   // =========================================================================
-  const categoryNames = ['Rock', 'Pop', 'Electronica', 'Latin'];
+  const categoryNames = ['Rock', 'Pop', 'Electronica', 'Latin', 'Custom'];
   const categoriesMap: Record<string, Category> = {};
 
   for (const name of categoryNames) {
@@ -124,6 +124,26 @@ export const runSeed = async () => {
       image_url: 'https://images.unsplash.com/photo-1511735111819-9a3f7709049c?auto=format&fit=crop&w=600&q=80',
       category: categoriesMap['Pop'],
       stock: 20,
+    },
+    {
+      name: 'Custom CD',
+      artist: 'Disc Market Custom',
+      format: 'CD',
+      price: 99.0,
+      description: 'Plantilla oficial de CD personalizado: carátula impresa, estuche acrílico estándar y quema de pistas.',
+      image_url: 'https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&w=600&q=80',
+      category: categoriesMap['Custom'],
+      stock: 100,
+    },
+    {
+      name: 'Custom Vinyl',
+      artist: 'Disc Market Custom',
+      format: 'Vinyl',
+      price: 799.0,
+      description: 'Plantilla oficial de Vinilo 12" personalizado en torno de corte directo con portada y mensaje impreso.',
+      image_url: 'https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&w=600&q=80',
+      category: categoriesMap['Custom'],
+      stock: 50,
     },
   ];
 

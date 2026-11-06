@@ -17,12 +17,7 @@ const userRepo = AppDataSource.getRepository(User);
 export const checkout = async (req: Request, res: Response): Promise<void> => {
   try {
     const authReq = req as any;
-    let userId = authReq.user?.user_id || (req.body.user_id ? parseInt(req.body.user_id, 10) : null);
-
-    if (!userId) {
-      const firstUser = await userRepo.findOne({ order: { user_id: 'ASC' } });
-      userId = firstUser ? firstUser.user_id : null;
-    }
+    const userId = authReq.user?.user_id;
 
     if (!userId) {
       res.status(401).json({ message: 'Se requiere iniciar sesión para completar la compra' });
@@ -103,6 +98,15 @@ export const checkout = async (req: Request, res: Response): Promise<void> => {
 
 export const getOrderById = async (req: Request, res: Response): Promise<void> => {
   try {
+    const authReq = req as any;
+    const userId = authReq.user?.user_id;
+    const userRole = authReq.user?.role;
+
+    if (!userId) {
+      res.status(401).json({ message: 'Se requiere iniciar sesión para consultar la orden' });
+      return;
+    }
+
     const { id } = req.params;
     const order = await orderRepo.findOne({
       where: { order_id: parseInt(id, 10) },
@@ -117,6 +121,12 @@ export const getOrderById = async (req: Request, res: Response): Promise<void> =
 
     if (!order) {
       res.status(404).json({ message: 'Orden no encontrada' });
+      return;
+    }
+
+    // El usuario solo puede consultar sus propias órdenes a menos que sea administrador
+    if (order.user_id !== userId && userRole !== 'admin') {
+      res.status(403).json({ message: 'No tienes autorización para consultar esta orden' });
       return;
     }
 
