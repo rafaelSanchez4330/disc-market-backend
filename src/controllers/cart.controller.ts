@@ -2,266 +2,60 @@ import { Request, Response } from 'express';
 import { AppDataSource } from '../config/data-source';
 import { ShoppingCart } from '../entities/ShoppingCart';
 import { CartItem } from '../entities/CartItem';
-import { Product } from '../entities/Product';
-import { CustomProduct } from '../entities/CustomProduct';
-import { User } from '../entities/User';
+import { CheckoutReservation } from '../entities/CheckoutReservation';
+import { AuthenticatedRequest } from '../middlewares/auth.middleware';
+import { activeCart, assertEditable, changeCartItem, positiveId, quantityValue, StockError } from '../services/stock.service';
 
-const cartRepo = AppDataSource.getRepository(ShoppingCart);
-const cartItemRepo = AppDataSource.getRepository(CartItem);
-const productRepo = AppDataSource.getRepository(Product);
-const customProductRepo = AppDataSource.getRepository(CustomProduct);
-const userRepo = AppDataSource.getRepository(User);
-
-export const getUserCart = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const authReq = req as any;
-    const userId = authReq.user?.user_id;
-    const requestedUserId = req.params.user_id ? parseInt(req.params.user_id, 10) : null;
-
-    if (!userId) {
-      res.status(401).json({ message: 'Se requiere autenticación para consultar el carrito' });
-      return;
+function handler(action: (req: Request, res: Response, userId: number) => Promise<void>) {
+  return async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = (req as AuthenticatedRequest).user?.user_id;
+      if (!userId) throw new StockError('Se requiere iniciar sesión.', 401);
+      if (req.params.user_id && positiveId(req.params.user_id) !== userId) throw new StockError('No tienes acceso a este carrito.', 403);
+      await action(req, res, userId);
+    } catch (error) {
+      res.status(error instanceof StockError ? error.status : 500).json({ message: error instanceof StockError ? error.message : 'No se pudo actualizar el carrito.' });
     }
+  };
+}
 
-    if (requestedUserId && requestedUserId !== userId && authReq.user?.role !== 'admin') {
-      res.status(403).json({ message: 'No tienes autorización para consultar el carrito de otro usuario' });
-      return;
-    }
+export const getUserCart = handler(async (_req, res, userId) => {
+  const cart = await AppDataSource.transaction(manager => activeCart(manager, userId));
+  const loaded = await AppDataSource.getRepository(ShoppingCart).findOneOrFail({
+    where: { cart_id: cart.cart_id }, relations: ['cart_items', 'cart_items.product', 'cart_items.product.inventory', 'cart_items.custom_product', 'cart_items.custom_product.custom_tracks'],
+  });
+  const pending = await AppDataSource.getRepository(CheckoutReservation).findOneBy({ cart_id: cart.cart_id, status: 'reserved' });
+  res.json({ ...loaded, checkout_pending: Boolean(pending), reservation_expires_at: pending?.expires_at ?? null,
+    cart_items: loaded.cart_items.map(item => ({ ...item, unit_price: Number(item.unit_price),
+      product: item.product ? { ...item.product, price: Number(item.product.price) } : null,
+      custom_product: item.custom_product ? { ...item.custom_product, price: Number(item.custom_product.price) } : null })) });
+});
 
-    let cart = await cartRepo.findOne({
-      where: { user_id: userId, status: 'active' },
-      relations: [
-        'cart_items',
-        'cart_items.product',
-        'cart_items.custom_product',
-        'cart_items.custom_product.custom_tracks',
-      ],
-    });
+export const addToCart = handler(async (req, res, userId) => {
+  const { product_id, custom_product_id } = req.body;
+  const productId = product_id == null ? undefined : positiveId(product_id);
+  const customId = custom_product_id == null ? undefined : positiveId(custom_product_id);
+  if (Boolean(productId) === Boolean(customId)) throw new StockError('Selecciona un producto regular o personalizado.', 400);
+  const quantity = quantityValue(req.body.quantity === undefined ? 1 : req.body.quantity);
+  res.status(201).json(await changeCartItem(userId, { productId, customId, quantity, add: true }));
+});
 
-    if (!cart) {
-      cart = cartRepo.create({
-        user_id: userId,
-        status: 'active',
-      });
-      await cartRepo.save(cart);
-      cart.cart_items = [];
-    }
+export const updateCartItem = handler(async (req, res, userId) => {
+  const quantity = quantityValue(req.body.quantity, true);
+  const result = await changeCartItem(userId, { itemId: positiveId(req.params.item_id), quantity });
+  res.json(result ?? { message: 'Ítem eliminado.' });
+});
 
-    // Formatear precios numéricos
-    const formattedCart = {
-      ...cart,
-      cart_items: (cart.cart_items || []).map((item) => ({
-        ...item,
-        unit_price: Number(item.unit_price),
-        product: item.product
-          ? { ...item.product, price: Number(item.product.price) }
-          : null,
-        custom_product: item.custom_product
-          ? { ...item.custom_product, price: Number(item.custom_product.price) }
-          : null,
-      })),
-    };
+export const removeFromCart = handler(async (req, res, userId) => {
+  await changeCartItem(userId, { itemId: positiveId(req.params.item_id), quantity: 0 });
+  res.json({ message: 'Ítem eliminado.' });
+});
 
-    res.json(formattedCart);
-  } catch (error: any) {
-    res.status(500).json({ message: 'Error al obtener carrito', error: error.message });
-  }
-};
-
-export const addToCart = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const authReq = req as any;
-    const userId = authReq.user?.user_id;
-
-    if (!userId) {
-      res.status(401).json({ message: 'Se requiere iniciar sesión para agregar productos al carrito' });
-      return;
-    }
-
-    const { product_id, custom_product_id, quantity } = req.body;
-    const qty = quantity ? parseInt(quantity, 10) : 1;
-
-    let cart = await cartRepo.findOne({
-      where: { user_id: userId, status: 'active' },
-    });
-
-    if (!cart) {
-      cart = cartRepo.create({
-        user_id: userId,
-        status: 'active',
-      });
-      await cartRepo.save(cart);
-    }
-
-    let unit_price = 0;
-
-    if (custom_product_id) {
-      const customProduct = await customProductRepo.findOne({
-        where: { custom_product_id: parseInt(custom_product_id, 10) },
-      });
-      if (!customProduct) {
-        res.status(404).json({ message: 'Producto personalizado no encontrado' });
-        return;
-      }
-      unit_price = Number(customProduct.price);
-    } else if (product_id) {
-      const product = await productRepo.findOne({
-        where: { product_id: parseInt(product_id, 10) },
-      });
-      if (!product) {
-        res.status(404).json({ message: 'Producto regular no encontrado' });
-        return;
-      }
-      unit_price = Number(product.price);
-    } else {
-      res.status(400).json({ message: 'Debe especificar product_id o custom_product_id' });
-      return;
-    }
-
-    // Verificar si el ítem ya existe en el carrito
-    let existingItem = await cartItemRepo.findOne({
-      where: custom_product_id
-        ? { cart_id: cart.cart_id, custom_product_id: parseInt(custom_product_id, 10) }
-        : { cart_id: cart.cart_id, product_id: parseInt(product_id, 10) },
-      relations: ['product', 'custom_product'],
-    });
-
-    if (existingItem) {
-      existingItem.quantity += qty;
-      await cartItemRepo.save(existingItem);
-      res.json({
-        ...existingItem,
-        unit_price: Number(existingItem.unit_price),
-      });
-    } else {
-      const newItem = cartItemRepo.create({
-        cart_id: cart.cart_id,
-        product_id: product_id || null,
-        custom_product_id: custom_product_id || null,
-        quantity: qty,
-        unit_price,
-      });
-      const savedItem = await cartItemRepo.save(newItem);
-      const loaded = await cartItemRepo.findOne({
-        where: { cart_item_id: savedItem.cart_item_id },
-        relations: ['product', 'custom_product'],
-      });
-      res.status(201).json({
-        ...loaded,
-        unit_price: Number(loaded?.unit_price ?? unit_price),
-      });
-    }
-  } catch (error: any) {
-    res.status(500).json({ message: 'Error al agregar al carrito', error: error.message });
-  }
-};
-
-export const updateCartItem = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const authReq = req as any;
-    const userId = authReq.user?.user_id;
-
-    if (!userId) {
-      res.status(401).json({ message: 'Se requiere autenticación' });
-      return;
-    }
-
-    const { item_id } = req.params;
-    const { quantity } = req.body;
-    const qty = parseInt(quantity, 10);
-
-    const item = await cartItemRepo.findOne({
-      where: { cart_item_id: parseInt(item_id, 10) },
-      relations: ['cart'],
-    });
-
-    if (!item) {
-      res.status(404).json({ message: 'Ítem no encontrado en el carrito' });
-      return;
-    }
-
-    if (item.cart && item.cart.user_id !== userId && authReq.user?.role !== 'admin') {
-      res.status(403).json({ message: 'No estás autorizado para modificar este ítem' });
-      return;
-    }
-
-    if (qty <= 0) {
-      await cartItemRepo.delete({ cart_item_id: item.cart_item_id });
-      res.json({ message: 'Ítem eliminado por cantidad cero' });
-      return;
-    }
-
-    item.quantity = qty;
-    await cartItemRepo.save(item);
-
-    res.json({
-      ...item,
-      unit_price: Number(item.unit_price),
-    });
-  } catch (error: any) {
-    res.status(500).json({ message: 'Error al actualizar cantidad del ítem', error: error.message });
-  }
-};
-
-export const removeFromCart = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const authReq = req as any;
-    const userId = authReq.user?.user_id;
-
-    if (!userId) {
-      res.status(401).json({ message: 'Se requiere autenticación' });
-      return;
-    }
-
-    const { item_id } = req.params;
-    const item = await cartItemRepo.findOne({
-      where: { cart_item_id: parseInt(item_id, 10) },
-      relations: ['cart'],
-    });
-
-    if (!item) {
-      res.status(404).json({ message: 'Ítem no encontrado en el carrito' });
-      return;
-    }
-
-    if (item.cart && item.cart.user_id !== userId && authReq.user?.role !== 'admin') {
-      res.status(403).json({ message: 'No estás autorizado para eliminar este ítem' });
-      return;
-    }
-
-    await cartItemRepo.delete({ cart_item_id: item.cart_item_id });
-    res.json({ message: 'Elemento eliminado del carrito' });
-  } catch (error: any) {
-    res.status(500).json({ message: 'Error al eliminar ítem del carrito', error: error.message });
-  }
-};
-
-export const clearCart = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const authReq = req as any;
-    const userId = authReq.user?.user_id;
-    const requestedUserId = req.params.user_id ? parseInt(req.params.user_id, 10) : null;
-
-    if (!userId) {
-      res.status(401).json({ message: 'Se requiere autenticación' });
-      return;
-    }
-
-    if (requestedUserId && requestedUserId !== userId && authReq.user?.role !== 'admin') {
-      res.status(403).json({ message: 'No estás autorizado para vaciar el carrito de otro usuario' });
-      return;
-    }
-
-    const cart = await cartRepo.findOne({
-      where: { user_id: userId, status: 'active' },
-    });
-
-    if (cart) {
-      await cartItemRepo.delete({ cart_id: cart.cart_id });
-    }
-
-    res.json({ message: 'Carrito vaciado exitosamente' });
-  } catch (error: any) {
-    res.status(500).json({ message: 'Error al vaciar carrito', error: error.message });
-  }
-};
+export const clearCart = handler(async (_req, res, userId) => {
+  await AppDataSource.transaction(async manager => {
+    const cart = await activeCart(manager, userId);
+    await assertEditable(manager, cart);
+    await manager.getRepository(CartItem).delete({ cart_id: cart.cart_id });
+  });
+  res.json({ message: 'Carrito vaciado.' });
+});

@@ -2,9 +2,9 @@ import { Request, Response } from 'express';
 import { AppDataSource } from '../config/data-source';
 import { Product } from '../entities/Product';
 import { Inventory } from '../entities/Inventory';
+import { quantityValue, StockError } from '../services/stock.service';
 
 const productRepository = AppDataSource.getRepository(Product);
-const inventoryRepository = AppDataSource.getRepository(Inventory);
 
 export const getProducts = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -80,28 +80,27 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
   try {
     const { name, artist, format, price, description, image_url, category_id, stock } = req.body;
 
-    const newProduct = productRepository.create({
-      name,
-      artist,
-      format,
-      price,
-      description,
-      image_url,
-      category: category_id ? { category_id } : undefined,
+    const initialStock = quantityValue(stock ?? 0, true);
+    if (typeof name !== 'string' || !name.trim() || typeof artist !== 'string' || !artist.trim()
+      || typeof format !== 'string' || !['CD', 'VINYL'].includes(format.toUpperCase())
+      || typeof price !== 'number' || !Number.isFinite(price) || price <= 0 || price > 99999999.99) {
+      throw new StockError('Nombre, artista, formato y precio válidos son obligatorios.', 400);
+    }
+    const savedProduct = await AppDataSource.transaction(async manager => {
+      const newProduct = manager.getRepository(Product).create({
+        name, artist, format, price, description, image_url,
+        category: category_id ? { category_id } : undefined,
+      });
+      const savedProduct = await manager.getRepository(Product).save(newProduct);
+      const initialInventory = manager.getRepository(Inventory).create({
+        product_id: savedProduct.product_id, quantity_available: initialStock, quantity_reserved: 0,
+      });
+      await manager.getRepository(Inventory).save(initialInventory);
+      return savedProduct;
     });
-
-    const savedProduct = await productRepository.save(newProduct);
-
-    // Crear inventario inicial
-    const initialInventory = inventoryRepository.create({
-      product_id: savedProduct.product_id,
-      quantity_available: stock || 0,
-      quantity_reserved: 0,
-    });
-    await inventoryRepository.save(initialInventory);
 
     res.status(201).json(savedProduct);
   } catch (error: any) {
-    res.status(500).json({ message: 'Error al crear producto', error: error.message });
+    res.status(error instanceof StockError ? error.status : 500).json({ message: error instanceof StockError ? error.message : 'Error al crear producto' });
   }
 };

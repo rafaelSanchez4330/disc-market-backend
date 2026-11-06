@@ -1,5 +1,21 @@
 # Disc Market - Backend API
 
+## Entorno y despliegue
+
+- [Arrancar y validar el panel de administración](docs/ADMIN.md)
+
+- [Control de stock, reservas y pagos](docs/STOCK.md)
+
+- [Architecture, service interactions, and database relationships](docs/ARCHITECTURE.md)
+
+- [Preguntas y respuestas para estudiar la arquitectura y el flujo](docs/GUIA-ESTUDIO.md)
+
+- [Configuración local y pgAdmin](docs/LOCAL-SETUP.md)
+- [Guía del VPS, dominio, HTTPS y operación](docs/DESPLIEGUE.md)
+- Sitio de prueba: https://vinylhrz.tech
+
+
+
 API REST para la plataforma de comercio electrónico de CDs y Vinilos convencionales y personalizados, desarrollada con **Node.js**, **Express**, **TypeScript**, **TypeORM** y **PostgreSQL**, con almacenamiento local de archivos mediante **Multer**.
 
 ---
@@ -82,4 +98,4 @@ disc-market-backend/
    npm run dev
    ```
    El servidor estará disponible en: `http://localhost:5000`  
-   Endpoint de verificación: `http://localhost:5000/api/health`
+   Endpoint de verificación: `http://localhost:5000/api/health`

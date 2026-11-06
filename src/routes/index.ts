@@ -7,8 +7,10 @@ import cartRoutes from './cart.routes';
 import orderRoutes from './order.routes';
 import paymentRoutes from './payment.routes';
 import userRoutes from './user.routes';
+import adminRoutes from './admin.routes';
 
 const router = Router();
+router.use('/admin', adminRoutes);
 
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
