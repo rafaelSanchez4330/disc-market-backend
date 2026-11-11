@@ -1,0 +1,23 @@
+name: Deploy Backend to Hostinger VPS
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /opt/disc-market/backend
+            git pull
+            npm install --no-audit
+            npm run build
+            chown -R discmarket:discmarket /opt/disc-market/backend
+            systemctl restart disc-market.service
