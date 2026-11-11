@@ -27,8 +27,24 @@ export const createCustomProduct = async (req: Request, res: Response): Promise<
     const coverFile = req.file;
     const cover_image = coverFile ? `/uploads/covers/${coverFile.filename}` : null;
 
+    // No permitir personalizaciones vacías: formato, título, portada y declaración son obligatorios
+    const normalizedFormat = typeof format === 'string' ? format.trim().toUpperCase() : '';
+    const normalizedTitle = typeof title === 'string' ? title.trim() : '';
+    const validationError =
+      !['CD', 'VINYL'].includes(normalizedFormat) ? 'Selecciona un formato válido (CD o vinilo).'
+      : normalizedTitle.length < 2 ? 'El título del disco personalizado es obligatorio (mínimo 2 caracteres).'
+      : normalizedTitle.length > 100 ? 'El título no puede superar los 100 caracteres.'
+      : !coverFile ? 'Debes subir una imagen de portada para tu disco personalizado.'
+      : !(copyright_disclaimer_accepted === true || copyright_disclaimer_accepted === 'true') ? 'Debes aceptar la declaración de derechos de autor.'
+      : null;
+    if (validationError) {
+      await safelyDeleteFile(req.file?.path);
+      res.status(400).json({ message: validationError });
+      return;
+    }
+
     // Consultar precio base oficial desde PostgreSQL para evitar desincronización y manipulación
-    const isVinyl = (format || '').toUpperCase() === 'VINYL';
+    const isVinyl = normalizedFormat === 'VINYL';
     const templateProduct = await productRepo.findOne({
       where: isVinyl
         ? [{ name: 'Custom Vinyl' }, { name: 'Vinilo Personalizado' }]
@@ -49,8 +65,8 @@ export const createCustomProduct = async (req: Request, res: Response): Promise<
 
     const newCustomProduct = customProductRepo.create({
       user_id: userId,
-      format: format || 'CD',
-      title: title || 'Mi Disco Personalizado',
+      format: normalizedFormat,
+      title: normalizedTitle,
       cover_image: cover_image || undefined,
       message,
       packaging_option: packaging_option || 'standard',

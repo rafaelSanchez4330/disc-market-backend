@@ -78,7 +78,7 @@ export const getAdminSummary = handler(async (req, res) => {
   const paidOrders = Number(sales.paid_orders);
   const revenue = Number(sales.revenue);
   res.json({ revenue, paid_orders: paidOrders, total_orders: totalOrders,
-    average_order: paidOrders ? revenue / paidOrders : 0, users, products, low_stock: lowStock, currency: 'USD' });
+    average_order: paidOrders ? revenue / paidOrders : 0, users, products, low_stock: lowStock, currency: 'MXN' });
 });
 
 export const getAdminProducts = handler(async (req, res) => {

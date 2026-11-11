@@ -12,6 +12,9 @@ import { Shipping } from '../entities/Shipping';
 import { activeCart, checkoutLines, StockError, stockTotals, validateStock } from './stock.service';
 import { getStripe } from './stripeClient';
 
+// Todos los cobros se realizan en pesos mexicanos (código ISO 4217 en minúsculas, como lo espera Stripe).
+export const CHECKOUT_CURRENCY = 'mxn';
+
 const RESERVATION_MS = 15 * 60 * 1000;
 
 export async function reserveCheckout(userId: number, shippingMethod: string, shippingAddress: string) {
@@ -45,7 +48,7 @@ export async function ensurePaymentIntent(reservationId: string): Promise<Stripe
       throw new StockError('La reserva requiere revisión del administrador antes de liberar existencias.');
     }
     const intent = await stripe.paymentIntents.create({
-      amount: reservation.amount_cents, currency: 'usd',
+      amount: reservation.amount_cents, currency: CHECKOUT_CURRENCY,
       metadata: { reservationId, userId: String(reservation.user_id), cartId: String(reservation.cart_id) },
       automatic_payment_methods: { enabled: true, allow_redirects: 'never' },
     }, { idempotencyKey: `checkout-${reservationId}` });
@@ -58,7 +61,7 @@ export async function ensurePaymentIntent(reservationId: string): Promise<Stripe
 function verifyIntent(reservation: CheckoutReservation, intent: Stripe.PaymentIntent) {
   if (reservation.stripe_intent_id !== intent.id || intent.metadata.reservationId !== reservation.reservation_id
     || intent.metadata.userId !== String(reservation.user_id) || intent.metadata.cartId !== String(reservation.cart_id)
-    || intent.amount !== reservation.amount_cents || intent.currency !== 'usd') {
+    || intent.amount !== reservation.amount_cents || intent.currency !== CHECKOUT_CURRENCY) {
     throw new StockError('El pago no coincide con la reserva.');
   }
 }

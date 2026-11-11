@@ -4,7 +4,7 @@ import { LessThan } from 'typeorm';
 import { AppDataSource } from '../config/data-source';
 import { CheckoutReservation } from '../entities/CheckoutReservation';
 import { AuthenticatedRequest } from '../middlewares/auth.middleware';
-import { reserveCheckout, ensurePaymentIntent, completeCheckout, cancelCheckout, releaseCancelledCheckout } from '../services/checkout.service';
+import { reserveCheckout, ensurePaymentIntent, completeCheckout, cancelCheckout, releaseCancelledCheckout, CHECKOUT_CURRENCY } from '../services/checkout.service';
 import { StockError } from '../services/stock.service';
 import { getStripe } from '../services/stripeClient';
 
@@ -33,7 +33,7 @@ export const createPaymentIntent = handler(async (req, res, userId) => {
   if (intent.status === 'succeeded') { await completeCheckout(intent); throw new StockError('Este pago ya se completó. Consulta tus pedidos.'); }
   if (intent.status === 'canceled') { await releaseCancelledCheckout(intent); throw new StockError('El pago fue cancelado. Inicia el pago nuevamente.'); }
   res.json({ clientSecret: intent.client_secret, paymentIntentId: intent.id, amount: reservation.amount_cents / 100,
-    currency: 'usd', expiresAt: reservation.expires_at });
+    currency: CHECKOUT_CURRENCY, expiresAt: reservation.expires_at });
 });
 
 export const confirmPayment = handler(async (req, res, userId) => {
