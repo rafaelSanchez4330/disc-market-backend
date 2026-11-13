@@ -19,5 +19,7 @@ jobs:
             git pull
             npm install --no-audit
             npm run build
+            # Agrega a PostgreSQL las tablas/columnas nuevas (solo cambios aditivos)
+            npm run db:sync-schema
             chown -R discmarket:discmarket /opt/disc-market/backend
             systemctl restart disc-market.service

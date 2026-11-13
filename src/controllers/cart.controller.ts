@@ -14,6 +14,8 @@ function handler(action: (req: Request, res: Response, userId: number) => Promis
       if (req.params.user_id && positiveId(req.params.user_id) !== userId) throw new StockError('No tienes acceso a este carrito.', 403);
       await action(req, res, userId);
     } catch (error) {
+      // Registrar errores inesperados (p. ej. esquema de BD desactualizado) para poder diagnosticarlos.
+      if (!(error instanceof StockError)) console.error('[cart] Error inesperado:', error);
       res.status(error instanceof StockError ? error.status : 500).json({ message: error instanceof StockError ? error.message : 'No se pudo actualizar el carrito.' });
     }
   };
