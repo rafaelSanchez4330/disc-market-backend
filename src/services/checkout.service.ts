@@ -14,6 +14,8 @@ import { getStripe } from './stripeClient';
 
 // Todos los cobros se realizan en pesos mexicanos (código ISO 4217 en minúsculas, como lo espera Stripe).
 export const CHECKOUT_CURRENCY = 'mxn';
+// Monto mínimo exigido por Stripe para cobros en MXN ($10.00 MXN = 1000 centavos).
+export const MIN_CHECKOUT_CENTS = 1000;
 
 const RESERVATION_MS = 15 * 60 * 1000;
 
@@ -27,7 +29,9 @@ export async function reserveCheckout(userId: number, shippingMethod: string, sh
     if (!items.length) throw new StockError('El carrito está vacío.', 400);
     const lines = await checkoutLines(manager, items, userId);
     const amount = lines.reduce((sum, line) => sum + Math.round(line.unit_price * 100) * line.quantity, 0);
-    if (!Number.isSafeInteger(amount) || amount < 1 || amount > 2147483647) throw new StockError('El importe del carrito no es válido.', 400);
+    if (!Number.isSafeInteger(amount) || amount < MIN_CHECKOUT_CENTS || amount > 2147483647) {
+      throw new StockError('El monto mínimo para procesar pagos con tarjeta en Stripe es de $10.00 MXN.', 400);
+    }
     await validateStock(manager, lines, true);
     return repo.save(repo.create({ user_id: userId, cart_id: cart.cart_id, status: 'reserved', lines,
       amount_cents: amount, shipping_method: shippingMethod, shipping_address: shippingAddress,
