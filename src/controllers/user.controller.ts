@@ -230,6 +230,15 @@ export const updatePreferences = async (
       avatar_url,
     } = req.body;
 
+    if (preferred_format !== undefined && !['ALL', 'CD', 'VINYL'].includes(preferred_format)) {
+      res.status(400).json({ message: 'Formato preferido inválido.' });
+      return;
+    }
+    if (theme !== undefined && !['dark', 'light', 'high-contrast'].includes(theme)) {
+      res.status(400).json({ message: 'Tema de la plataforma inválido.' });
+      return;
+    }
+
     const preferences = await getOrCreatePreferences(userId);
 
     if (phone !== undefined) preferences.phone = phone ? String(phone).trim() : null;
