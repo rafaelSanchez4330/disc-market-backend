@@ -301,7 +301,7 @@ export const getUserOrders = async (
         'order_items',
         'order_items.product',
         'order_items.custom_product',
-        'order_items.custom_product.tracks',
+        'order_items.custom_product.custom_tracks',
         'payment',
         'shipping',
       ],

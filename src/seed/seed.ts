@@ -287,10 +287,16 @@ export const runSeed = async () => {
   if (existingOrders.length === 0) {
     console.log('📦 Generando órdenes de prueba en el historial del cliente demo...');
 
+    // Totales calculados con los precios reales del catálogo (antes estaban fijos y no
+    // coincidían con el precio de los artículos cuando cambiaban los precios).
+    const priceOf = (name: string) => Number(savedProductsMap[name]?.price ?? 0);
+    const order1Total = priceOf('Random Access Memories') + priceOf('Thriller');
+    const order2Total = priceOf('Abbey Road');
+
     // Pedido 1: Entregado (Daft Punk + Michael Jackson)
     const order1 = orderRepo.create({
       user_id: demoUser.user_id,
-      total_amount: 1598.0,
+      total_amount: order1Total,
       order_status: 'delivered',
       payment_status: 'paid',
     });
@@ -321,7 +327,7 @@ export const runSeed = async () => {
         order_id: savedOrder1.order_id,
         payment_method: 'credit_card',
         payment_status: 'completed',
-        amount: 1598.0,
+        amount: order1Total,
       })
     );
 
@@ -337,7 +343,7 @@ export const runSeed = async () => {
     // Pedido 2: En preparación (Abbey Road)
     const order2 = orderRepo.create({
       user_id: demoUser.user_id,
-      total_amount: 799.0,
+      total_amount: order2Total,
       order_status: 'processing',
       payment_status: 'paid',
     });
@@ -360,7 +366,7 @@ export const runSeed = async () => {
         order_id: savedOrder2.order_id,
         payment_method: 'credit_card',
         payment_status: 'completed',
-        amount: 799.0,
+        amount: order2Total,
       })
     );
 
