@@ -9,6 +9,8 @@ import { Order } from '../entities/Order';
 import { OrderItem } from '../entities/OrderItem';
 import { Payment } from '../entities/Payment';
 import { Shipping } from '../entities/Shipping';
+import { CustomProduct } from '../entities/CustomProduct';
+import { CartItem } from '../entities/CartItem';
 
 export const runSeed = async () => {
   if (!AppDataSource.isInitialized) {
@@ -49,7 +51,7 @@ export const runSeed = async () => {
       name: 'Thriller',
       artist: 'Michael Jackson',
       format: 'Vinyl',
-      price: 699.0,
+      price: 10.0,
       description: 'Edición en vinilo del álbum más vendido de la historia. Incluye los clásicos que definieron el pop de los 80.',
       image_url: 'https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&w=600&q=80',
       category: categoriesMap['Pop'],
@@ -59,7 +61,7 @@ export const runSeed = async () => {
       name: '30',
       artist: 'Adele',
       format: 'CD',
-      price: 199.0,
+      price: 10.0,
       description: 'El cuarto álbum de Adele, íntimo y cinematográfico. Edición en CD con libreto especial.',
       image_url: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&w=600&q=80',
       category: categoriesMap['Pop'],
@@ -69,7 +71,7 @@ export const runSeed = async () => {
       name: 'Back in Black',
       artist: 'AC/DC',
       format: 'Vinyl',
-      price: 749.0,
+      price: 10.0,
       description: 'Hard rock de referencia mundial. Vinilo pesado de 180g, arte clásico y riffs legendarios.',
       image_url: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=600&q=80',
       category: categoriesMap['Rock'],
@@ -79,7 +81,7 @@ export const runSeed = async () => {
       name: 'Abbey Road',
       artist: 'The Beatles',
       format: 'Vinyl',
-      price: 799.0,
+      price: 10.0,
       description: 'El legendario álbum del cruce peatonal de Abbey Road. Remasterizado en vinilo estéreo.',
       image_url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80',
       category: categoriesMap['Rock'],
@@ -89,7 +91,7 @@ export const runSeed = async () => {
       name: 'The Dark Side of the Moon',
       artist: 'Pink Floyd',
       format: 'Vinyl',
-      price: 829.0,
+      price: 10.0,
       description: 'Prisma, psicodelia y rock progresivo. Edición especial en vinilo para audiófilos.',
       image_url: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=80',
       category: categoriesMap['Rock'],
@@ -99,7 +101,7 @@ export const runSeed = async () => {
       name: 'Un Verano Sin Ti',
       artist: 'Bad Bunny',
       format: 'CD',
-      price: 249.0,
+      price: 10.0,
       description: 'El verano eterno en CD. Éxitos globales con ritmos caribeños y colaboraciones estelares.',
       image_url: 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?auto=format&fit=crop&w=600&q=80',
       category: categoriesMap['Latin'],
@@ -109,7 +111,7 @@ export const runSeed = async () => {
       name: 'Random Access Memories',
       artist: 'Daft Punk',
       format: 'Vinyl',
-      price: 899.0,
+      price: 10.0,
       description: 'Doble vinilo gatefold de una de las mayores obras de la música electrónica moderna.',
       image_url: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=600&q=80',
       category: categoriesMap['Electronica'],
@@ -119,7 +121,7 @@ export const runSeed = async () => {
       name: 'Sour',
       artist: 'Olivia Rodrigo',
       format: 'CD',
-      price: 229.0,
+      price: 10.0,
       description: 'Álbum debut en formato CD estándar: pop-punk, baladas emotivas y grandes hits.',
       image_url: 'https://images.unsplash.com/photo-1511735111819-9a3f7709049c?auto=format&fit=crop&w=600&q=80',
       category: categoriesMap['Pop'],
@@ -129,7 +131,7 @@ export const runSeed = async () => {
       name: 'Custom CD',
       artist: 'Disc Market Custom',
       format: 'CD',
-      price: 99.0,
+      price: 10.0,
       description: 'Plantilla oficial de CD personalizado: carátula impresa, estuche acrílico estándar y quema de pistas.',
       image_url: 'https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&w=600&q=80',
       category: categoriesMap['Custom'],
@@ -139,7 +141,7 @@ export const runSeed = async () => {
       name: 'Custom Vinyl',
       artist: 'Disc Market Custom',
       format: 'Vinyl',
-      price: 799.0,
+      price: 10.0,
       description: 'Plantilla oficial de Vinilo 12" personalizado en torno de corte directo con portada y mensaje impreso.',
       image_url: 'https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&w=600&q=80',
       category: categoriesMap['Custom'],
@@ -193,7 +195,20 @@ export const runSeed = async () => {
     savedProductsMap[item.name] = p;
   }
 
-  console.log(`✅ Catálogo inicial sincronizado: ${sampleProducts.length} productos listos en PostgreSQL.`);
+  // Sincronizar también precios de discos personalizados y carritos existentes a $10.00 MXN
+  await AppDataSource.getRepository(CustomProduct)
+    .createQueryBuilder()
+    .update(CustomProduct)
+    .set({ price: 10.0 })
+    .execute();
+
+  await AppDataSource.getRepository(CartItem)
+    .createQueryBuilder()
+    .update(CartItem)
+    .set({ unit_price: 10.0 })
+    .execute();
+
+  console.log(`✅ Catálogo inicial sincronizado: ${sampleProducts.length} productos listos en PostgreSQL ($10.00 MXN).`);
 
   // =========================================================================
   // 3. USUARIOS DE PRUEBA Y PREFERENCIAS

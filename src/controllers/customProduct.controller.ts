@@ -54,8 +54,8 @@ export const createCustomProduct = async (req: Request, res: Response): Promise<
     const officialBasePrice = templateProduct
       ? Number(templateProduct.price)
       : isVinyl
-        ? 799.0
-        : 99.0;
+        ? 10.0
+        : 10.0;
 
     // Si el frontend envía un precio que coincide o se confía en la tarifa oficial calculada
     const normalizedPrice = officialBasePrice;
@@ -354,8 +354,8 @@ export const getCustomProductPricing = async (_req: Request, res: Response): Pro
       where: [{ name: 'Custom Vinyl' }, { name: 'Vinilo Personalizado' }],
     });
 
-    const cdPrice = cdProduct ? Number(cdProduct.price) : 99.0;
-    const vinylPrice = vinylProduct ? Number(vinylProduct.price) : 799.0;
+    const cdPrice = cdProduct ? Number(cdProduct.price) : 10.0;
+    const vinylPrice = vinylProduct ? Number(vinylProduct.price) : 10.0;
 
     res.json({
       CD: {
