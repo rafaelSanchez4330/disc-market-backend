@@ -20,5 +20,6 @@ jobs:
             git pull
             npm install --no-audit
             npm run build
+            node dist/seed/seed.js
             chown -R discmarket:discmarket /opt/disc-market/backend
             systemctl restart disc-market.service
