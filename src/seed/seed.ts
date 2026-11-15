@@ -133,7 +133,7 @@ export const runSeed = async () => {
       format: 'CD',
       price: 10.0,
       description: 'Plantilla oficial de CD personalizado: carátula impresa, estuche acrílico estándar y quema de pistas.',
-      image_url: 'https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&w=600&q=80',
+      image_url: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&w=600&q=80',
       category: categoriesMap['Custom'],
       stock: 100,
     },
