@@ -2,7 +2,8 @@ name: Deploy Backend to Hostinger VPS
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, feat/user-preferences ]
+  workflow_dispatch:
 
 jobs:
   deploy:
